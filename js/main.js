@@ -271,13 +271,77 @@
 
   function gameOver() {
     G.state = 'gameover';
-    if (G.score > G.best) { G.best = G.score; try { localStorage.setItem('jetstrike_best', G.best); } catch (e) { /* 保存不可 */ } }
+    const isNew = G.score > G.best;
+    if (isNew) { G.best = G.score; try { localStorage.setItem('jetstrike_best', G.best); } catch (e) { /* 保存不可 */ } }
     $('goScore').textContent = G.score; $('goKills').textContent = G.kills; $('goStage').textContent = G.stage;
     $('goBest').textContent = G.best; $('best').textContent = G.best;
+    $('goNew').classList.toggle('hidden', !isNew || G.score === 0);
+    $('goRank').textContent = rankOf(G.score);
+    $('goShot').classList.add('hidden');
+    $('shareNote').textContent = '';
+    shotBlob = null;
+    G.snap = true; // 次に描画したフレームを記念写真として保存
     $('gameover').classList.remove('hidden');
     $('hud').classList.add('hidden'); $('touch').classList.add('hidden');
     Sfx.engine(false, 0, 0, 0);
   }
+
+  // ---------------------------------------------------------------- 結果シェア
+  let shotBlob = null;
+  function rankOf(score) {
+    if (score >= 15000) return '伝説の撃墜王';
+    if (score >= 8000) return 'トップガン';
+    if (score >= 4000) return 'エースパイロット';
+    if (score >= 1500) return '一人前のパイロット';
+    if (score >= 500) return '新米パイロット';
+    return 'ひよっこ訓練生';
+  }
+  // file:// で開いている時は共有できる URL がないので本文だけにする
+  const shareUrl = () => (/^https?:/.test(location.protocol) ? location.href.split('#')[0] : '');
+  function shareText() {
+    return `JET STRIKE 〜音速の翼〜 で ${G.score}点！ 撃墜${G.kills}機・STAGE ${G.stage} 到達、称号は「${rankOf(G.score)}」だ！✈🔥 #JETSTRIKE`;
+  }
+  function openShare(url) { window.open(url, '_blank', 'noopener,width=620,height=560'); }
+  function note(msg) { $('shareNote').textContent = msg; }
+  async function copyResult() {
+    const text = shareText() + (shareUrl() ? ' ' + shareUrl() : '');
+    try { await navigator.clipboard.writeText(text); }
+    catch (e) {
+      const ta = document.createElement('textarea');
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); } catch (e2) { /* コピー不可 */ }
+      ta.remove();
+    }
+    note('結果をコピーしました！ SNS に貼り付けてね');
+  }
+  (function setupShare() {
+    $('shareX').addEventListener('click', () => {
+      const u = shareUrl();
+      openShare('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText()) + (u ? '&url=' + encodeURIComponent(u) : ''));
+    });
+    $('shareLine').addEventListener('click', () => {
+      const u = shareUrl();
+      openShare('https://line.me/R/share?text=' + encodeURIComponent(shareText() + (u ? '\n' + u : '')));
+    });
+    $('shareFb').addEventListener('click', () => {
+      const u = shareUrl();
+      if (!u) { copyResult(); note('Facebook はページの URL が必要です（Web 公開後に使えます）。結果はコピーしました'); return; }
+      openShare('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(u) + '&quote=' + encodeURIComponent(shareText()));
+    });
+    $('shareCopy').addEventListener('click', copyResult);
+    if (navigator.share) {
+      $('shareNative').classList.remove('hidden');
+      $('shareNative').addEventListener('click', async () => {
+        const data = { title: 'JET STRIKE', text: shareText() };
+        if (shareUrl()) data.url = shareUrl();
+        if (shotBlob) {
+          const file = new File([shotBlob], 'jetstrike.jpg', { type: 'image/jpeg' });
+          if (navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
+        }
+        try { await navigator.share(data); } catch (e) { /* キャンセル */ }
+      });
+    }
+  })();
 
   function shakeAt(p, amount, range) {
     const d = camera.position.distanceTo(p);
@@ -1323,6 +1387,17 @@
       G.state === 'deck' ? 0.2 : 0.6, flyingish ? clamp(pv, 0, 1) : 0, player.ab);
 
     renderer.render(scene, camera);
+    if (G.snap) {
+      G.snap = false;
+      renderer.domElement.toBlob(b => {
+        if (!b) return;
+        shotBlob = b;
+        const img = $('goShot');
+        if (img.src) URL.revokeObjectURL(img.src);
+        img.src = URL.createObjectURL(b);
+        img.classList.remove('hidden');
+      }, 'image/jpeg', 0.85);
+    }
     if (G.state !== 'title' && G.state !== 'gameover') {
       drawOverlay();
       drawRadar();

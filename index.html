@@ -66,8 +66,21 @@
 <div id="gameover" class="screen hidden">
   <h1 id="goTitle">GAME OVER</h1>
   <p class="lead">SCORE <span id="goScore">0</span>　撃墜 <span id="goKills">0</span>　STAGE <span id="goStage">1</span></p>
-  <p class="best">HIGH SCORE <span id="goBest">0</span></p>
+  <p class="rank">称号：<span id="goRank"></span></p>
+  <p class="best">HIGH SCORE <span id="goBest">0</span><span id="goNew" class="hidden">　NEW RECORD!</span></p>
+  <img id="goShot" class="hidden" alt="最後の瞬間">
   <button id="retryBtn">再出撃</button>
+  <div class="share">
+    <p>結果をシェアしよう！</p>
+    <div class="shareBtns">
+      <button id="shareX" class="sbtn x" title="X（旧Twitter）でポスト">𝕏 ポスト</button>
+      <button id="shareLine" class="sbtn line" title="LINEで送る">LINE</button>
+      <button id="shareFb" class="sbtn fb" title="Facebookでシェア">Facebook</button>
+      <button id="shareCopy" class="sbtn copy" title="結果をコピー">コピー</button>
+      <button id="shareNative" class="sbtn more hidden" title="画像つきでシェア">画像つきでシェア</button>
+    </div>
+    <p id="shareNote"></p>
+  </div>
 </div>
 
 <div id="pause" class="screen hidden"><h1>PAUSE</h1><p class="lead">P キーで再開</p></div>
