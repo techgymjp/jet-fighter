@@ -85,7 +85,7 @@
   }
 
   const G = {
-    state: 'title', t: 0, st: 0, score: 0, kills: 0, stage: 1, lives: 3, best: 0,
+    state: 'title', t: 0, st: 0, score: 0, kills: 0, stats: null, stage: 1, lives: 3, best: 0,
     shake: 0, dmgFlash: 0, camMode: 'chase', invert: false, paused: false, camBlend: 1, orbitA: 0,
     launchPhase: '', catSpeed: 0, refuel: false, ready: false, stageClearT: 0, deathPos: new V3(),
     land: null, warnT: 0, fade: 0, fadeDir: 0, onFadeMid: null,
@@ -207,6 +207,7 @@
 
   function startGame() {
     clearWorld();
+    G.stats = { sunk: 0, landings: 0, maxSpeed: 0, flightTime: 0, fuelOuts: 0 };
     G.score = 0; G.kills = 0; G.stage = 1; G.lives = 3; G.stageClearT = 0; G.paused = false;
     $('title').classList.add('hidden'); $('gameover').classList.add('hidden'); $('pause').classList.add('hidden');
     $('hud').classList.remove('hidden');
@@ -271,16 +272,26 @@
 
   function gameOver() {
     G.state = 'gameover';
-    const isNew = G.score > G.best;
+    const isNew = G.score > G.best && G.score > 0;
     if (isNew) { G.best = G.score; try { localStorage.setItem('jetstrike_best', G.best); } catch (e) { /* 保存不可 */ } }
-    $('goScore').textContent = G.score; $('goKills').textContent = G.kills; $('goStage').textContent = G.stage;
-    $('goBest').textContent = G.best; $('best').textContent = G.best;
-    $('goNew').classList.toggle('hidden', !isNew || G.score === 0);
-    $('goRank').textContent = rankOf(G.score);
-    $('goShot').classList.add('hidden');
-    $('shareNote').textContent = '';
+    $('best').textContent = G.best;
+    $('goScore').textContent = G.score.toLocaleString();
+    $('goNew').classList.toggle('hidden', !isNew);
+    $('goRank').textContent = `称号「${rankOf(G.score)}」`;
+    const S = G.stats;
+    const mm = Math.floor(S.flightTime / 60), ss = Math.floor(S.flightTime % 60);
+    $('goTable').innerHTML = [
+      ['撃墜数', `${G.kills} 機`],
+      ['敵空母撃沈', `${S.sunk} 隻`],
+      ['到達ステージ', `STAGE ${G.stage}`],
+      ['最高速度', `${Math.round(S.maxSpeed * 3.6).toLocaleString()} km/h（マッハ ${(S.maxSpeed / MACH1).toFixed(2)}）`],
+      ['着艦成功', `${S.landings} 回`],
+      ['飛行時間', `${mm}分${String(ss).padStart(2, '0')}秒`],
+      ['ハイスコア', `${G.best.toLocaleString()} pts`],
+    ].map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('');
+    $('goTip').textContent = `💡 ${tipFor(S)}`;
     shotBlob = null;
-    G.snap = true; // 次に描画したフレームを記念写真として保存
+    G.snap = true; // 次に描画したフレームを記念写真としてシェア用に保存
     $('gameover').classList.remove('hidden');
     $('hud').classList.add('hidden'); $('touch').classList.add('hidden');
     Sfx.engine(false, 0, 0, 0);
@@ -296,51 +307,30 @@
     if (score >= 500) return '新米パイロット';
     return 'ひよっこ訓練生';
   }
-  // file:// で開いている時は共有できる URL がないので本文だけにする
-  const shareUrl = () => (/^https?:/.test(location.protocol) ? location.href.split('#')[0] : '');
-  function shareText() {
-    return `JET STRIKE 〜音速の翼〜 で ${G.score}点！ 撃墜${G.kills}機・STAGE ${G.stage} 到達、称号は「${rankOf(G.score)}」だ！✈🔥 #JETSTRIKE`;
-  }
-  function openShare(url) { window.open(url, '_blank', 'noopener,width=620,height=560'); }
-  function note(msg) { $('shareNote').textContent = msg; }
-  async function copyResult() {
-    const text = shareText() + (shareUrl() ? ' ' + shareUrl() : '');
-    try { await navigator.clipboard.writeText(text); }
-    catch (e) {
-      const ta = document.createElement('textarea');
-      ta.value = text; document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); } catch (e2) { /* コピー不可 */ }
-      ta.remove();
-    }
-    note('結果をコピーしました！ SNS に貼り付けてね');
+  function tipFor(S) {
+    if (S.landings === 0 && S.fuelOuts > 0) return '燃料が 35% を切ったら HOME マーカーへ。母艦の近くで L キーを押せば自動で着艦できるぞ。';
+    if (S.sunk === 0 && G.kills >= 3) return '敵空母にはミサイルが効く。赤い「LOCK」が出てから F キーで撃てば 1 発で大ダメージ！';
+    if (G.kills < 3) return 'SHIFT のアフターバーナーで一気に距離を詰め、敵機を照準の円に重ねて SPACE で撃て。';
+    if (S.maxSpeed < MACH1) return 'アフターバーナーを踏み続けてマッハ 1 を突破すると、衝撃雲が出るぞ。';
+    return '着艦すれば燃料・弾薬・装甲がすべて回復。こまめに補給して次の敵空母へ！';
   }
   (function setupShare() {
-    $('shareX').addEventListener('click', () => {
-      const u = shareUrl();
-      openShare('https://twitter.com/intent/tweet?text=' + encodeURIComponent(shareText()) + (u ? '&url=' + encodeURIComponent(u) : ''));
-    });
-    $('shareLine').addEventListener('click', () => {
-      const u = shareUrl();
-      openShare('https://line.me/R/share?text=' + encodeURIComponent(shareText() + (u ? '\n' + u : '')));
-    });
-    $('shareFb').addEventListener('click', () => {
-      const u = shareUrl();
-      if (!u) { copyResult(); note('Facebook はページの URL が必要です（Web 公開後に使えます）。結果はコピーしました'); return; }
-      openShare('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(u) + '&quote=' + encodeURIComponent(shareText()));
-    });
-    $('shareCopy').addEventListener('click', copyResult);
-    if (navigator.share) {
-      $('shareNative').classList.remove('hidden');
-      $('shareNative').addEventListener('click', async () => {
-        const data = { title: 'JET STRIKE', text: shareText() };
-        if (shareUrl()) data.url = shareUrl();
+    $('btnShare').addEventListener('click', async () => {
+      const text = `JET STRIKE 〜音速の翼〜 で ${G.score.toLocaleString()}点！ 撃墜${G.kills}機・敵空母${G.stats.sunk}隻撃沈 称号「${rankOf(G.score)}」 #JETSTRIKE`;
+      // file:// で開いている時は共有できる URL がないので本文だけにする
+      const url = /^https?:/.test(location.protocol) ? location.href.split('#')[0] : '';
+      if (navigator.share) {
+        const data = { title: 'JET STRIKE 〜音速の翼〜', text };
+        if (url) data.url = url;
         if (shotBlob) {
           const file = new File([shotBlob], 'jetstrike.jpg', { type: 'image/jpeg' });
-          if (navigator.canShare && navigator.canShare({ files: [file] })) data.files = [file];
+          if (navigator.canShare && navigator.canShare({ ...data, files: [file] })) data.files = [file];
         }
         try { await navigator.share(data); } catch (e) { /* キャンセル */ }
-      });
-    }
+      } else {
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}${url ? `&url=${encodeURIComponent(url)}` : ''}`, '_blank');
+      }
+    });
   })();
 
   function shakeAt(p, amount, range) {
@@ -394,7 +384,7 @@
     const burn = !engineOn ? 0 : p.abOn ? 2.7 : inp.brake ? 0.55 : 0.8;
     const before = p.fuel;
     p.fuel = Math.max(0, p.fuel - burn * dt);
-    if (before > 0 && p.fuel <= 0) { showMsg('FLAME OUT', '燃料切れ！ エンジン停止… 滑空して母艦へ！', 3); Sfx.beep(300, 0.4, 0.2); }
+    if (before > 0 && p.fuel <= 0) { G.stats.fuelOuts++; showMsg('FLAME OUT', '燃料切れ！ エンジン停止… 滑空して母艦へ！', 3); Sfx.beep(300, 0.4, 0.2); }
 
     // マッハ突破
     if (p.prevSpeed < MACH1 && p.speed >= MACH1) {
@@ -403,6 +393,8 @@
       showMsg(null, 'MACH 1 突破！', 1.2);
     }
     p.prevSpeed = p.speed;
+    G.stats.maxSpeed = Math.max(G.stats.maxSpeed, p.speed);
+    G.stats.flightTime += dt;
 
     // 機銃
     p.gunT -= dt;
@@ -552,6 +544,7 @@
         enterDeck(true);
         showMsg('着艦成功！', '給油・補給中…', 2);
         G.score += 50;
+        G.stats.landings++;
       }
     }
   }
@@ -893,6 +886,7 @@
     if (c.hp <= 0) {
       c.hp = 0; c.alive = false; c.dying = 0; c.boomT = 0;
       G.score += 2000;
+      G.stats.sunk++;
       showMsg('敵空母 撃沈！！', '+2000　大爆発に巻き込まれるな！', 3);
     }
   }
@@ -1389,14 +1383,7 @@
     renderer.render(scene, camera);
     if (G.snap) {
       G.snap = false;
-      renderer.domElement.toBlob(b => {
-        if (!b) return;
-        shotBlob = b;
-        const img = $('goShot');
-        if (img.src) URL.revokeObjectURL(img.src);
-        img.src = URL.createObjectURL(b);
-        img.classList.remove('hidden');
-      }, 'image/jpeg', 0.85);
+      renderer.domElement.toBlob(b => { shotBlob = b; }, 'image/jpeg', 0.85);
     }
     if (G.state !== 'title' && G.state !== 'gameover') {
       drawOverlay();
