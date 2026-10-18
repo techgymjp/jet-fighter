@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>JET STRIKE - 音速の翼</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="game"></div>
+<div id="vignette"></div>
+<canvas id="overlay"></canvas>
+<div id="damageFlash"></div>
+<div id="fade"></div>
+
+<div id="hud" class="hidden">
+  <div id="topLeft">
+    <div>SCORE <span id="score">0</span></div>
+    <div>STAGE <span id="stage">1</span>　撃墜 <span id="kills">0</span></div>
+    <div>LIVES <span id="lives"></span></div>
+  </div>
+  <div id="ecWrap">
+    <label>敵空母</label>
+    <div class="bar"><div id="ecBar"></div></div>
+  </div>
+  <canvas id="radar" width="360" height="360"></canvas>
+
+  <div id="bottomLeft">
+    <div class="big"><span id="speed">0</span><small> km/h</small></div>
+    <div>MACH <span id="mach">0.00</span>　ALT <span id="alt">0</span> m</div>
+    <div id="thr"></div>
+  </div>
+
+  <div id="bottomRight">
+    <div class="gauge"><label>FUEL</label><div class="bar"><div id="fuelBar"></div></div><span id="fuelTxt">100%</span></div>
+    <div class="gauge"><label>ARMOR</label><div class="bar"><div id="hpBar"></div></div><span id="hpTxt">100%</span></div>
+    <div class="ammo">GUN <span id="ammo">0</span>　MSL <span id="msl">0</span></div>
+  </div>
+
+  <div id="centerMsg"></div>
+  <div id="subMsg"></div>
+  <div id="warning"></div>
+  <div id="hint"></div>
+</div>
+
+<div id="title" class="screen">
+  <h1>JET STRIKE</h1>
+  <h2>〜 音速の翼 〜</h2>
+  <p class="lead">空母からカタパルトで射出！ 敵機を撃墜し、敵空母を撃沈せよ。<br>燃料が尽きる前に母艦へ帰還し、給油して再出撃だ。</p>
+  <button id="startBtn">出撃する</button>
+  <table class="controls">
+    <tr><th>W / S (↑ / ↓)</th><td>機首 上げ / 下げ</td></tr>
+    <tr><th>A / D (← / →)</th><td>ロール（旋回）</td></tr>
+    <tr><th>Q / E</th><td>ラダー（左右）</td></tr>
+    <tr><th>SHIFT</th><td>アフターバーナー（燃料を多く消費）</td></tr>
+    <tr><th>X</th><td>減速</td></tr>
+    <tr><th>SPACE / J</th><td>機銃</td></tr>
+    <tr><th>F / K</th><td>ミサイル（ロックオン時は誘導）</td></tr>
+    <tr><th>L</th><td>着艦（母艦の近く・低空で）</td></tr>
+    <tr><th>SPACE / ENTER</th><td>発艦（甲板上で）</td></tr>
+    <tr><th>C / V / P</th><td>視点切替 / 上下反転 / ポーズ</td></tr>
+  </table>
+  <p class="best">HIGH SCORE <span id="best">0</span></p>
+</div>
+
+<div id="gameover" class="screen hidden">
+  <h1 id="goTitle">GAME OVER</h1>
+  <p class="lead">SCORE <span id="goScore">0</span>　撃墜 <span id="goKills">0</span>　STAGE <span id="goStage">1</span></p>
+  <p class="best">HIGH SCORE <span id="goBest">0</span></p>
+  <button id="retryBtn">再出撃</button>
+</div>
+
+<div id="pause" class="screen hidden"><h1>PAUSE</h1><p class="lead">P キーで再開</p></div>
+
+<div id="touch" class="hidden">
+  <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
+  <div id="btns">
+    <button id="tFire">機銃</button>
+    <button id="tMsl">MSL</button>
+    <button id="tAB">AB</button>
+    <button id="tBrake">減速</button>
+    <button id="tAct">発艦/着艦</button>
+    <button id="tCam">視点</button>
+  </div>
+</div>
+
+<script src="js/vendor/three.min.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/models.js"></script>
+<script src="js/effects.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
