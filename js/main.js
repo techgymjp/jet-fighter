@@ -299,6 +299,8 @@
 
   // ---------------------------------------------------------------- 結果シェア
   let shotBlob = null;
+  // シェア時はゲームを紹介している記事ページへ誘導する
+  const SHARE_URL = 'https://techgym.jp/column/claude-code-game-jet-fighter/';
   function rankOf(score) {
     if (score >= 15000) return '伝説の撃墜王';
     if (score >= 8000) return 'トップガン';
@@ -317,18 +319,17 @@
   (function setupShare() {
     $('btnShare').addEventListener('click', async () => {
       const text = `JET STRIKE 〜音速の翼〜 で ${G.score.toLocaleString()}点！ 撃墜${G.kills}機・敵空母${G.stats.sunk}隻撃沈 称号「${rankOf(G.score)}」 #JETSTRIKE`;
-      // file:// で開いている時は共有できる URL がないので本文だけにする
-      const url = /^https?:/.test(location.protocol) ? location.href.split('#')[0] : '';
+      const url = SHARE_URL;
       if (navigator.share) {
         const data = { title: 'JET STRIKE 〜音速の翼〜', text };
-        if (url) data.url = url;
+        data.url = url;
         if (shotBlob) {
           const file = new File([shotBlob], 'jetstrike.jpg', { type: 'image/jpeg' });
           if (navigator.canShare && navigator.canShare({ ...data, files: [file] })) data.files = [file];
         }
         try { await navigator.share(data); } catch (e) { /* キャンセル */ }
       } else {
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}${url ? `&url=${encodeURIComponent(url)}` : ''}`, '_blank');
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
       }
     });
   })();
