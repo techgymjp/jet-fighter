@@ -136,7 +136,7 @@ npm run android:open   # Android Studio で開く
 
 ## ライセンス
 
-All rights reserved. 著作権はテックジム株式会社に帰属します。無断での複製・改変・再配布、Web サイトやアプリとしての公開を禁止します（詳しくは `LICENSE`）。
+All rights reserved. 著作権はテックジム株式会社に帰属します。無断での複製・改変・再配布、Web サイトやアプリとしての公開を禁止します。ただし、テックジムの受講生が学習目的で複製・改変することは許可します（商用利用は不可。詳しくは `LICENSE`）。
 同梱の Three.js は MIT License です（`js/vendor/THREE_LICENSE`）。
 
 ## ファイル構成
