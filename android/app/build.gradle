@@ -17,6 +17,14 @@ android {
         }
     }
     signingConfigs {
+        // 動作確認用 APK の署名鍵をリポジトリで固定し、CI のどのビルドでも上書きインストールできるようにする
+        // （公開されて困らないデバッグ専用の鍵。Google Play 用の鍵とは別物）
+        debug {
+            storeFile file("debug.keystore")
+            storePassword "android"
+            keyAlias "androiddebugkey"
+            keyPassword "android"
+        }
         release {
             // Google Play 用のアップロード鍵。CI では GitHub Secrets から渡す
             def ks = System.getenv("ANDROID_KEYSTORE_PATH")

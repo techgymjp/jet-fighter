@@ -57,7 +57,15 @@
 ### ビルド方法
 
 **GitHub Actions（自動）**: Web 版や `android/` を変更して push すると、`.github/workflows/android.yml` が動作確認用の APK を作ります。
-GitHub の Actions タブ → 実行結果 → Artifacts の `jet-strike-debug-apk` からダウンロードし、Android 端末にインストールして試せます。
+既定ブランチのビルドは GitHub の Release（`android-latest`）に自動で載るので、Android 端末で次の URL を開くか QR コードを読み取るだけで最新版をダウンロードできます。
+
+https://github.com/techgymjp/jet-fighter/releases/latest/download/jet-strike.apk
+
+<img src="docs/apk-qr.png" alt="APK ダウンロード用 QR コード" width="180">
+
+ダウンロードした `jet-strike.apk` を開き、「提供元不明のアプリ」のインストールを許可するとインストールできます。
+動作確認用の署名鍵（`android/app/debug.keystore`）はリポジトリで固定しているので、新しいビルドもアンインストールせずに上書きインストールできます。
+（Release に載る APK はデバッグ版です。Google Play には下の手順で作る署名済み .aab を使います）
 
 **手元の PC（Android Studio）**:
 

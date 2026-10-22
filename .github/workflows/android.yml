@@ -17,6 +17,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # Release に APK を載せるため
     env:
       # 署名鍵が登録されているときだけ Google Play 用の AAB を作る
       HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
@@ -55,6 +57,27 @@ jobs:
         with:
           name: jet-strike-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+      # スマホから直接ダウンロードできるよう、既定ブランチのビルドは Release に載せる。
+      # いつも同じ URL（releases/latest/download/jet-strike.apk）で最新版が取れるよう、
+      # 前回の android-latest を消して作り直す
+      - name: Publish APK to GitHub Release
+        if: github.ref_name == github.event.repository.default_branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk jet-strike.apk
+          gh release delete android-latest --yes --cleanup-tag || true
+          gh release create android-latest jet-strike.apk \
+            --target "$GITHUB_SHA" \
+            --latest \
+            --title "JET STRIKE Android 版 v${VERSION_NAME} (build ${VERSION_CODE})" \
+            --notes "動作確認用の APK です（デバッグ署名。Google Play 版ではありません）。
+
+          Android 端末でこのページを開き、下の jet-strike.apk をタップしてインストールしてください。
+          途中で「提供元不明のアプリ」のインストールを許可する必要があります。
+
+          ビルド元のコミット: ${GITHUB_SHA}"
 
       - name: Decode upload keystore
         if: env.HAS_KEYSTORE == 'true'
