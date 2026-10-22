@@ -1,0 +1,138 @@
+# Web ゲームを Android 化して Google Play に出すための引き継ぎメモ
+
+JET STRIKE（このリポジトリ）で、Web ゲームを Android アプリにし、AdMob 広告を入れて Google Play の審査に出すところまで進めました。
+ほかの Web ゲームを同じように Android 化するときに、別のセッション（Claude Code）へ渡すためのメモです。
+
+**別セッションへの頼み方の例**
+
+> techgymjp/jet-fighter の docs/ANDROID_PORTING.md を読んで、このゲームを同じ構成で Android 化してください。パッケージ名は jp.techgym.〇〇 です。
+
+参考実装はこのリポジトリです。迷ったら同じファイルを見てまねしてください。
+
+---
+
+## 1. もう済んでいること（ゲームごとにやり直さなくてよい）
+
+| 項目 | 状態 | ゲームごとに必要なこと |
+| --- | --- | --- |
+| Google Play デベロッパー アカウント | TECH GYM の組織アカウントで登録・本人確認済み | なし（同じアカウントで「アプリを作成」するだけ） |
+| AdMob アカウント | 作成済み（パブリッシャー ID `pub-6411535997477460`） | アプリの追加と広告ユニットの作成 |
+| app-ads.txt | `https://techgym.jp/app-ads.txt` に設置済み | なし（パブリッシャー単位なので全アプリ共通） |
+| 欧州の規制（GDPR）メッセージ | JET STRIKE 向けに公開済み | 新しいアプリをメッセージの対象アプリに追加する |
+| プライバシーポリシー | 日本語 https://techgym.jp/privacy-policy/ ・英語 https://techgym.jp/privacy-policy-en/ | なし（同じ URL を使う） |
+| アップロード鍵（upload.jks） | ユーザーの PC に保管済み | 同じ鍵を使い回してよい。リポジトリごとに GitHub Secrets へ 4 つ登録する（下記） |
+
+---
+
+## 2. 技術構成（このリポジトリと同じにする）
+
+- **Capacitor 8**（`@capacitor/core` / `@capacitor/android` 8.5.2、`@capacitor/cli` 8.5.2）
+  - プラグイン：`@capacitor/app`（戻るボタン）、`@capacitor/share`（シェア）、`@capacitor-community/admob`（広告）
+  - ゲームのファイルはアプリに同梱する（オフラインで遊べる）。外部サーバーを読む方式にはしない
+  - バンドラーは使わず、ネイティブ機能は `window.Capacitor.Plugins.X` から呼ぶ。Web 版では `Capacitor` がないので何もしないように書く
+- **`scripts/build-web.js`**：`index.html` `css` `js` などを `www/` にコピーし、次の 2 ファイルを生成する
+  - `www/js/ads-config.js`：`ADMOB_MODE=production` のときだけ本番広告、それ以外はテスト広告
+  - `www/js/build-info.js`：タイトル画面に出すバージョン（`v1.0.0 (build 12)` など）
+- **`capacitor.config.json`**：`appId` はパッケージ名、`webDir` は `www`
+- **`.gitignore`**：`node_modules/` と `www/` を除外
+- **`vercel.json`**：`package.json` を足すと Vercel がビルドが必要と判断して失敗するので、`buildCommand: "npm run build"`、`outputDirectory: "www"` を指定する
+
+### Android 側（`android/`）
+
+- `AndroidManifest.xml`
+  - 画面の向き：横画面ゲームは `android:screenOrientation="sensorLandscape"`（縦画面ゲームなら `sensorPortrait`）
+  - AdMob のアプリ ID を `com.google.android.gms.ads.APPLICATION_ID` の meta-data に入れる（値は `res/values/strings.xml` の `admob_app_id`）
+- `MainActivity.java`：システムバーを隠して全画面、プレイ中は画面を消さない（`FLAG_KEEP_SCREEN_ON`）
+- `app/build.gradle`
+  - `versionCode` は環境変数 `VERSION_CODE`（CI の実行回数）、`versionName` は `VERSION_NAME`（`package.json` の version）
+  - `signingConfigs.debug` はリポジトリに入れた `app/debug.keystore`（パスワード android）。CI のどのビルドでも上書きインストールできるようにするため
+  - `signingConfigs.release` は環境変数（GitHub Secrets）から渡すアップロード鍵
+  - `minifyEnabled false`（Play Console の「難読化ファイルがない」警告は無視してよい）
+- アイコンと起動画面：`assets/` の元画像から生成
+
+### ゲーム側（JavaScript）でやったこと
+
+- 戻るボタン：プレイ中はポーズ、タイトルや結果画面ではアプリを終了
+- 別アプリに切り替えたら（`visibilitychange`）自動でポーズし、音（WebAudio）も止める
+- シェア：アプリでは `@capacitor/share` で Android の共有メニューを出す
+- タッチ操作の案内文：アプリではキー名ではなくボタン名で表示
+- タイトル画面にビルド番号とプライバシーポリシーへのリンクを表示
+- EU など同意が必要な地域向けに、タイトル画面に「広告の設定」ボタン（`showPrivacyOptions`）
+
+### 広告（`js/ads.js`）
+
+- インタースティシャル：ゲームオーバー後に「もう一度」を押したとき、2 回に 1 回
+- リワード：最後の残機を失ったときの「CONTINUE?」画面で、見ると残機 +1（1 ゲーム 1 回、10 秒で自動的にゲームオーバー）
+- バナーは入れない（横画面では操作ボタンと重なる）
+- 起動時に UMP（Google の同意確認）を実行。同意確認でエラーになっても広告は出せるようにする（ここで止まると広告が一切出なくなる）
+- 広告は先読みし、失敗したら 20 秒後に再挑戦。表示時に未読み込みなら最大 8 秒だけ待つ
+- テスト用の広告ユニット ID（Google 公式）と本番の ID を持ち、`window.AD_MODE` で切り替える
+
+### GitHub Actions（`.github/workflows/android.yml`）
+
+1. `npm ci` → `npm run build` → `npx cap sync android` → `./gradlew assembleDebug`
+2. 既定ブランチなら、Release `android-latest` に `xxx.apk` を `gh release upload --clobber` で差し替える（Release を消して作り直すと、その間ダウンロードが 404 になる）
+3. Secrets があれば、`ADMOB_MODE=production npm run build` → `npx cap copy android` → `./gradlew bundleRelease` で署名付き AAB を作り、Artifact に上げる
+- `concurrency` で古いビルドを取り消す。`timeout-minutes` を付けて固まったまま待たされないようにする
+- 動作確認用 APK の URL は `https://github.com/techgymjp/<リポジトリ>/releases/latest/download/<名前>.apk`。QR コードにしておくとスマホで入れやすい
+- **クラウドの Claude Code では dl.google.com に接続できず Android SDK を入れられないので、ビルドは GitHub Actions に任せる**
+
+---
+
+## 3. ゲームごとにやる手続き（ユーザーが画面で行う）
+
+1. **パッケージ名を決める**：`jp.techgym.〇〇`。Google Play に一度出すと変更できない
+2. **AdMob**
+   - 「アプリを追加」→ Android →「ストアに掲載されていない」で登録
+   - インタースティシャルとリワードの広告ユニットを作成
+   - アプリ ID（`ca-app-pub-…~…`）と広告ユニット ID 2 つを Claude Code に渡す
+   - 「プライバシーとメッセージ」→「欧州の規制」のメッセージに、新しいアプリを対象として追加
+3. **GitHub Secrets**（リポジトリの Settings → Secrets and variables → Actions）
+
+   | 名前 | 内容 |
+   | --- | --- |
+   | `ANDROID_KEYSTORE_BASE64` | `base64 -i upload.jks \| tr -d '\n' \| pbcopy` でコピーした文字列 |
+   | `ANDROID_KEYSTORE_PASSWORD` | キーストアのパスワード |
+   | `ANDROID_KEY_ALIAS` | `upload` |
+   | `ANDROID_KEY_PASSWORD` | 鍵のパスワード |
+
+4. **Play Console**
+   - 「アプリを作成」：アプリ名、デフォルトの言語 日本語、ゲーム、無料
+   - ストアの掲載情報：アプリ名（30 字）、簡単な説明（80 字）、詳しい説明、アイコン 512×512、フィーチャーグラフィック 1024×500、スクリーンショット（1920×1080 など）。英語（en-US）は「翻訳を管理」から追加
+   - アプリのコンテンツ（見つからなければ URL 末尾を `app-content/overview` に）
+     - プライバシーポリシー：https://techgym.jp/privacy-policy/
+     - アプリのアクセス権：制限なし
+     - 広告：含む
+     - 広告 ID：使用する（目的は「広告またはマーケティング」と「アナリティクス」）。申告しないと AAB アップロード時にエラー
+     - コンテンツのレーティング：ゲームの内容に合わせて回答
+     - ターゲットユーザー：13 歳以上（13 歳未満を含めると広告に制限がかかる）
+     - データセーフティ：アプリ自体は個人情報を集めない。AdMob が広告 ID とアプリの操作を広告・アナリティクス目的で収集・共有。通信は暗号化
+   - 本番リリース：Play App Signing を有効にし、Actions の Artifact からダウンロードした `.aab` をアップロード。リリースノートは `<ja-JP>…</ja-JP>` `<en-US>…</en-US>` で書く
+   - 「公開の概要」→「変更を審査に送信」
+5. **公開後**：AdMob でアプリを Google Play のストアに紐づける
+
+ストア用の画像と紹介文は、ゲームを自動操作してスクリーンショットを撮り、日英で下書きを作るところまで Claude Code に任せられる（このリポジトリの `docs/store/` が例）。
+
+---
+
+## 4. 守ること
+
+- **アップロード鍵（upload.jks）とパスワードは、チャット・AI へのアップロード・リポジトリへのコミットで絶対に共有しない**。誤って共有したら削除し、必要なら Play Console で鍵のリセットを申請する
+- **本番の広告を自分でタップしない**（AdMob アカウント停止の対象）。動作確認は Release の APK（テスト広告）で行う
+- 公開記事や教材に **GitHub の URL は載せない**
+- D-U-N-S 番号や AdMob の ID など、具体的な値は公開記事に書かない
+- コミットメッセージや PR にモデル名を入れない
+
+---
+
+## 5. つまずいたところ
+
+| 症状 | 原因と対処 |
+| --- | --- |
+| Vercel で「No Output Directory named public」 | `package.json` を追加したため。`vercel.json` で `www` を指定する（有料プランは不要） |
+| QR コードの APK ダウンロードが 404 | Release を削除→作り直ししていたため。Release は残して APK だけ `--clobber` で差し替える |
+| 「広告を見て続行」が出ない | 古い APK のままだった。タイトル画面のビルド番号で確認する。広告の先読み・再挑戦と、同意確認エラー時の続行も入れておく |
+| 縦の短い画面で結果画面がはみ出す | 横画面のスマホは高さが小さい。`max-height: 500px` の横向き用メディアクエリで詰める |
+| AAB アップロードで広告 ID のエラー | 「アプリのコンテンツ」の広告 ID を「使用する」で申告する |
+| app-ads.txt を開くとサイトの通常ページが出る | Ads.txt Manager の「App-ads.txt」ページに貼る。WordPress の「パーマリンク」を変更せずに保存し、キャッシュも削除する |
+| Play Console で電話番号確認が押せない | 本人確認と書類の審査が終わるまで待つ |
