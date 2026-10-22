@@ -116,8 +116,7 @@ const I18N = (() => {
       'ctl.misc': 'Camera / Invert pitch / Pause',
       'legal.privacy': 'Privacy Policy',
       'legal.adSettings': 'Ad settings',
-      // 英語版のプライバシーポリシーができたら、ここを英語ページの URL に変える
-      'url.privacy': 'https://techgym.jp/privacy-policy/',
+      'url.privacy': 'https://techgym.jp/privacy-policy-en/',
       'hud.kills': 'KILLS',
       'hud.ec': 'ENEMY CARRIER',
       'go.new': '🎉 New personal best!',

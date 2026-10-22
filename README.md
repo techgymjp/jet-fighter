@@ -31,7 +31,7 @@
 
 端末やブラウザの言語が日本語なら日本語、それ以外なら英語で表示します。タイトル画面の「日本語 / English」でいつでも切り替えられ、選んだ言語は次回も使われます。
 文章はすべて `js/i18n.js` の翻訳表にまとまっています。言語を増やすときは、ここに新しい言語の表を追加します。
-英語版のプライバシーポリシーができたら、`js/i18n.js` の英語側の `url.privacy` をその URL に変えてください（今は日本語版を開きます）。
+タイトル画面のプライバシーポリシーへのリンクも言語に合わせて切り替わります（日本語: https://techgym.jp/privacy-policy/ 、英語: https://techgym.jp/privacy-policy-en/ 。`js/i18n.js` の `url.privacy`）。
 
 ## ゲームの流れ
 
@@ -74,7 +74,7 @@ Android アプリでのみ広告を表示します（Web 版には広告は出�
 | リワード | 最後の残機を失ったときの「CONTINUE?」画面で「広告を見て続行」を選ぶと、残機 +1 で再出撃（1 ゲーム 1 回まで、10 秒で自動的にゲームオーバー） |
 
 - EU・英国など同意が必要な地域では、初回起動時に Google の同意確認画面が出ます。その地域では、タイトル画面の「広告の設定」から同意内容をいつでも変更できます。
-- プライバシーポリシー（https://techgym.jp/privacy-policy/ ）へのリンクをタイトル画面に表示しています。Play Console の「アプリのコンテンツ」→「プライバシー ポリシー」にも同じ URL を登録します。
+- プライバシーポリシーへのリンクをタイトル画面に表示しています（日本語表示では https://techgym.jp/privacy-policy/ 、英語表示では https://techgym.jp/privacy-policy-en/ ）。Play Console の「アプリのコンテンツ」→「プライバシー ポリシー」には URL を 1 つしか登録できないので、日本語版を登録し、日本語版のページから英語版へリンクしておくと親切です。
 - 広告 ID は `js/ads.js`、AdMob のアプリ ID は `android/app/src/main/res/values/strings.xml` にあります。
 - 動作確認用 APK（Release の `jet-strike.apk`）は常に **Google のテスト広告** を表示します。自分でタップしても問題ありません。
 - Google Play 用の .aab をビルドするときだけ、CI が `ADMOB_MODE=production` で本番の広告に切り替えます（`scripts/build-web.js` が `js/ads-config.js` を書き換えます）。
