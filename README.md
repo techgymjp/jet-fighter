@@ -134,6 +134,11 @@ npm run android:open   # Android Studio で開く
 - 撃墜した敵機は炎上しながら墜落し、海面で水柱を上げます
 - 効果音は WebAudio で合成（外部音声ファイルなし）
 
+## ライセンス
+
+All rights reserved. 著作権はテックジム株式会社に帰属します。無断での複製・改変・再配布、Web サイトやアプリとしての公開を禁止します（詳しくは `LICENSE`）。
+同梱の Three.js は MIT License です（`js/vendor/THREE_LICENSE`）。
+
 ## ファイル構成
 
 ```
