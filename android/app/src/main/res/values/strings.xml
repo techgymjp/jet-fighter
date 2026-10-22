@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">JET STRIKE</string>
+    <string name="title_activity_main">JET STRIKE</string>
+    <string name="package_name">jp.techgym.jetstrike</string>
+    <string name="custom_url_scheme">jp.techgym.jetstrike</string>
+</resources>

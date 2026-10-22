@@ -1,0 +1,8 @@
+{
+  "appId": "jp.techgym.jetstrike",
+  "appName": "JET STRIKE",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#000000"
+  }
+}

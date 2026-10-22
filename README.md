@@ -41,6 +41,52 @@
 
 ゲームオーバー画面には、スコア・称号・撃墜数や最高速度などの戦績表・次回へのヒントを表示します。「シェア」ボタンでは、スマホなど共有機能のある端末では共有シート（対応端末は最後の瞬間の画像つき）、それ以外では X の投稿画面が開きます。シェアにはゲーム紹介記事の URL（https://techgym.jp/column/claude-code-game-jet-fighter/）が付きます。
 
+## Android 版（Google Play 配布用）
+
+[Capacitor](https://capacitorjs.com/) でゲームのファイルをアプリ内に同梱しているため、ネットにつながっていなくても遊べます。
+
+- 横画面固定・全画面表示（ステータスバー／ナビゲーションバーを隠す）
+- プレイ中は画面が暗くならない
+- Android の戻るボタンでポーズ（タイトル・結果画面ではアプリを終了）
+- 別のアプリに切り替えると自動でポーズし、音も止まる
+- 「シェア」は Android の共有メニューから LINE や X などを選べる
+- 案内文はタッチ操作のボタン名で表示
+
+アプリ ID は `jp.techgym.jetstrike` です（Google Play に一度公開すると変更できません）。
+
+### ビルド方法
+
+**GitHub Actions（自動）**: Web 版や `android/` を変更して push すると、`.github/workflows/android.yml` が動作確認用の APK を作ります。
+GitHub の Actions タブ → 実行結果 → Artifacts の `jet-strike-debug-apk` からダウンロードし、Android 端末にインストールして試せます。
+
+**手元の PC（Android Studio）**:
+
+```bash
+npm ci
+npm run android:sync   # Web ファイルを www/ にまとめて Android プロジェクトへコピー
+npm run android:open   # Android Studio で開く
+```
+
+### Google Play へ公開する手順
+
+1. アップロード鍵を作成し、安全な場所に保管する（なくすと更新版を出せなくなります）
+   ```bash
+   keytool -genkeypair -v -keystore upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
+   base64 -w0 upload.jks > upload.jks.base64   # macOS は base64 -i upload.jks
+   ```
+2. GitHub のリポジトリの Settings → Secrets and variables → Actions に次の 4 つを登録する
+   | 名前 | 内容 |
+   | --- | --- |
+   | `ANDROID_KEYSTORE_BASE64` | `upload.jks.base64` の中身 |
+   | `ANDROID_KEYSTORE_PASSWORD` | キーストアのパスワード |
+   | `ANDROID_KEY_ALIAS` | `upload`（作成時に指定した別名） |
+   | `ANDROID_KEY_PASSWORD` | 鍵のパスワード |
+3. Actions の「Android build」を実行すると、署名済みの `jet-strike-release-aab`（.aab）ができる
+4. [Google Play Console](https://play.google.com/console) でアプリを作成し、.aab をアップロードする
+   （ストア掲載情報・スクリーンショット・プライバシーポリシー・コンテンツのレーティングなどの入力が必要です）
+
+バージョン番号（versionCode）は Actions の実行回数が自動で使われます。表示用のバージョン名は `package.json` の `version` です。
+
 ## スピード感・爽快感の演出
 
 - 速度に応じて広がる視野角（FOV）、流れるスピードライン、周辺減光、カメラ振動
@@ -60,4 +106,7 @@ js/effects.js     爆発・煙・曳光弾・スピードラインなどのエ�
 js/models.js      戦闘機・空母・海・空・雲のモデル生成
 js/audio.js       効果音（WebAudio 合成）
 js/vendor/        Three.js r160（MIT License）
+icon.svg          アプリアイコンの元画像（assets/ に Android 用の元画像）
+android/          Android アプリのプロジェクト（Capacitor）
+scripts/          Android に同梱する Web ファイルを www/ にまとめるスクリプト
 ```

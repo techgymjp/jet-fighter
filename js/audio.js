@@ -81,6 +81,8 @@ const Sfx = (() => {
   return {
     init,
     engine,
+    suspend() { if (ctx && ctx.state === 'running') ctx.suspend(); },
+    resume() { if (ctx && ctx.state === 'suspended') ctx.resume(); },
     shot() { if (!ctx) return; burst(0.07, 1400, 0.7, 0.22); tone(140, 0.05, 0.12, 'square', 60); },
     boom(size, vol) {
       if (!ctx) return;

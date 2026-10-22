@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1b4f9c"/>
+      <stop offset="1" stop-color="#06142c"/>
+    </linearGradient>
+    <radialGradient id="fire" cx="0.5" cy="0.2" r="0.8">
+      <stop offset="0" stop-color="#fffbe0"/>
+      <stop offset="0.35" stop-color="#ffb02e"/>
+      <stop offset="1" stop-color="#ff3a00" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#cfd8e2"/>
+      <stop offset="0.5" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#aab6c4"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" fill="url(#sky)"/>
+  <g stroke="#ffffff" stroke-opacity="0.35" stroke-width="10" stroke-linecap="round">
+    <line x1="180" y1="220" x2="180" y2="520"/>
+    <line x1="844" y1="260" x2="844" y2="560"/>
+    <line x1="270" y1="600" x2="270" y2="860"/>
+    <line x1="760" y1="640" x2="760" y2="900"/>
+  </g>
+  <!-- アフターバーナー -->
+  <ellipse cx="470" cy="800" rx="40" ry="150" fill="url(#fire)"/>
+  <ellipse cx="554" cy="800" rx="40" ry="150" fill="url(#fire)"/>
+  <!-- 機体（上から見たシルエット、機首が上） -->
+  <path fill="url(#body)" stroke="#0b1a33" stroke-width="10" stroke-linejoin="round" d="
+    M512 140
+    C540 200 552 260 556 330
+    L560 420 L800 560 L800 610 L566 560
+    L572 660 L680 730 L680 770 L560 740
+    L548 760 L476 760 L464 740 L344 770 L344 730 L452 660
+    L458 560 L224 610 L224 560 L464 420
+    L468 330 C472 260 484 200 512 140 Z"/>
+  <ellipse cx="512" cy="320" rx="22" ry="60" fill="#163a66"/>
+  <path fill="#2f61aa" d="M488 600 L512 560 L536 600 L536 700 L488 700 Z" opacity="0.9"/>
+</svg>

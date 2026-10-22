@@ -31,7 +31,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; colo
 .ammo { margin-top: 4px; font-size: 18px; }
 #centerMsg { position: absolute; left: 0; right: 0; top: 26%; text-align: center; font-size: 56px; color: #fff;
   text-shadow: 0 0 18px #ff7a00, 0 0 4px #000; letter-spacing: 4px; opacity: 0; transition: opacity .2s; }
-#subMsg { position: absolute; left: 0; right: 0; top: calc(26% + 72px); text-align: center; font-size: 24px; color: #ffe9a8; opacity: 0; transition: opacity .2s; }
+#subMsg { position: absolute; left: 12%; right: 12%; top: calc(26% + 72px); text-align: center; font-size: 24px; color: #ffe9a8; opacity: 0; transition: opacity .2s; }
 #warning { position: absolute; left: 0; right: 0; top: 64%; text-align: center; font-size: 28px; color: #ff4a3a; }
 #hint { position: absolute; left: 0; right: 0; bottom: 120px; text-align: center; font-size: 24px; color: #fff; }
 .blink { animation: blink .5s steps(2) infinite; }
@@ -101,3 +101,35 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; colo
 /* 敵空母ゲージ：被弾時に白く光って揺れる */
 #ecWrap.hit .bar { border-color: #fff; box-shadow: 0 0 12px rgba(255,255,255,.9); }
 #ecWrap.hit #ecBar { background: linear-gradient(90deg, #ffffff, #ffe0a0); }
+
+/* タッチ端末（スマホ・Android アプリ）向けの表示切り替え */
+body:not(.touch) .tc { display: none; }
+body.touch .kb, body.touch .controls { display: none; }
+.touchHelp { font-size: 15px; line-height: 1.7; background: rgba(0,0,0,.45); border-radius: 8px; padding: 8px 14px; margin-top: 16px; }
+/* 横向きスマホ（高さが低い画面）向けのレイアウト */
+@media (max-height: 500px) {
+  .screen h1 { font-size: 46px; letter-spacing: 6px; }
+  .screen h2 { font-size: 18px; margin-bottom: 6px; }
+  .screen .lead { font-size: 14px; margin: 4px 0 10px; }
+  .screen button { font-size: 20px; padding: 10px 40px; }
+  .touchHelp { font-size: 12px; margin-top: 10px; }
+  .best { margin-top: 6px; }
+  #topLeft { font-size: 13px; top: 8px; }
+  #radar { width: 110px; height: 110px; top: 8px; }
+  #ecWrap { width: 220px; top: 8px; font-size: 12px; }
+  #bottomLeft { left: 12px; bottom: auto; top: 76px; font-size: 12px; }
+  #bottomLeft .big { font-size: 28px; }
+  #bottomLeft small { font-size: 12px; }
+  #bottomRight { right: 12px; bottom: auto; top: 126px; width: 190px; font-size: 11px; }
+  .gauge { margin-bottom: 4px; }
+  .bar { height: 10px; }
+  .ammo { font-size: 13px; }
+  #centerMsg { font-size: 34px; top: 22%; }
+  #subMsg { font-size: 15px; top: calc(22% + 44px); }
+  #warning { font-size: 18px; top: 58%; }
+  #hint { font-size: 15px; bottom: 16px; }
+  #stickBase { left: 24px; bottom: 20px; width: 130px; height: 130px; }
+  #stickKnob { left: 35px; top: 35px; }
+  #btns { bottom: 14px; right: 12px; grid-template-columns: repeat(3, 70px); gap: 8px; }
+  #btns button { height: 52px; font-size: 14px; }
+}

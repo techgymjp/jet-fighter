@@ -1,0 +1,20 @@
+{
+  "name": "jet-strike",
+  "version": "1.0.0",
+  "private": true,
+  "description": "JET STRIKE 〜音速の翼〜 ジェット戦闘機 3D ゲーム（Web / Android）",
+  "scripts": {
+    "build": "node scripts/build-web.js",
+    "android:sync": "npm run build && npx cap sync android",
+    "android:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "8.5.2",
+    "@capacitor/app": "8.1.2",
+    "@capacitor/core": "8.5.2",
+    "@capacitor/share": "8.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "8.5.2"
+  }
+}

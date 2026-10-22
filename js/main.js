@@ -13,7 +13,12 @@
 
   // ---------------------------------------------------------------- 描画基盤
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
+  // Android アプリ（Capacitor）で動いているか
+  const NATIVE = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  const plugin = name => (NATIVE && window.Capacitor.Plugins ? window.Capacitor.Plugins[name] : null);
+  // スマホは画素数が多く重くなりやすいので、描画解像度を抑えて滑らかさを優先する
+  const MOBILE = NATIVE || ('ontouchstart' in window && Math.min(screen.width, screen.height) < 820);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, MOBILE ? 1.25 : 1.75));
   renderer.setSize(innerWidth, innerHeight);
   $('game').appendChild(renderer.domElement);
   const scene = new THREE.Scene();
@@ -140,6 +145,10 @@
 
   // タッチ操作
   const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  // 案内文に出す操作名（タッチ端末ではボタン名で案内する）
+  const KEY = isTouch
+    ? { launch: '「発艦/着艦」ボタン', land: '「発艦/着艦」ボタン', msl: '「MSL」ボタン', gun: '「機銃」ボタン', ab: '「AB」ボタンの加速' }
+    : { launch: 'SPACE / ENTER', land: 'L キー', msl: 'F キー', gun: 'SPACE キー', ab: 'SHIFT のアフターバーナー' };
   (function setupTouch() {
     const zone = $('stickZone'), base = $('stickBase'), knob = $('stickKnob');
     let id = null, cx = 0, cy = 0;
@@ -170,12 +179,31 @@
     $('tCam').addEventListener('pointerdown', e => { e.preventDefault(); G.camMode = G.camMode === 'chase' ? 'cockpit' : 'chase'; });
   })();
 
+  // アプリが裏に回ったら一時停止して音を止める
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { setPaused(true); Sfx.suspend(); }
+    else Sfx.resume();
+  });
+  // Android の戻るボタン：プレイ中はポーズ切替、タイトル・結果画面ではアプリを閉じる
+  if (plugin('App')) {
+    plugin('App').addListener('backButton', () => {
+      if (G.state === 'title' || G.state === 'gameover') plugin('App').exitApp();
+      else togglePause();
+    });
+  }
+  if (isTouch) document.body.classList.add('touch');
+  $('pause').addEventListener('pointerdown', () => setPaused(false));
+
   $('startBtn').addEventListener('click', () => { Sfx.init(); startGame(); });
   $('retryBtn').addEventListener('click', () => { Sfx.init(); startGame(); });
 
   function togglePause() {
     if (G.state === 'title' || G.state === 'gameover') return;
-    G.paused = !G.paused;
+    setPaused(!G.paused);
+  }
+  function setPaused(on) {
+    if (G.state === 'title' || G.state === 'gameover') return;
+    G.paused = on;
     $('pause').classList.toggle('hidden', !G.paused);
     if (G.paused) Sfx.engine(false, 0, 0, 0);
   }
@@ -313,9 +341,9 @@
     return 'ひよっこ訓練生';
   }
   function tipFor(S) {
-    if (S.landings === 0 && S.fuelOuts > 0) return '燃料が 35% を切ったら HOME マーカーへ。母艦の近くで L キーを押せば自動で着艦できるぞ。';
-    if (S.sunk === 0 && G.kills >= 3) return '敵空母にはミサイルが効く。赤い「LOCK」が出てから F キーで撃てば 1 発で大ダメージ！';
-    if (G.kills < 3) return 'SHIFT のアフターバーナーで一気に距離を詰め、敵機を照準の円に重ねて SPACE で撃て。';
+    if (S.landings === 0 && S.fuelOuts > 0) return `燃料が 35% を切ったら HOME マーカーへ。母艦の近くで ${KEY.land}を押せば自動で着艦できるぞ。`;
+    if (S.sunk === 0 && G.kills >= 3) return `敵空母にはミサイルが効く。赤い「LOCK」が出てから ${KEY.msl}で撃てば 1 発で大ダメージ！`;
+    if (G.kills < 3) return `${KEY.ab}で一気に距離を詰め、敵機を照準の円に重ねて ${KEY.gun}で撃て。`;
     if (S.maxSpeed < MACH1) return 'アフターバーナーを踏み続けてマッハ 1 を突破すると、衝撃雲が出るぞ。';
     return '着艦すれば燃料・弾薬・装甲がすべて回復。こまめに補給して次の敵空母へ！';
   }
@@ -323,7 +351,10 @@
     $('btnShare').addEventListener('click', async () => {
       const text = `JET STRIKE 〜音速の翼〜 で ${G.score.toLocaleString()}点！ 撃墜${G.kills}機・敵空母${G.stats.sunk}隻撃沈 称号「${rankOf(G.score)}」 #JETSTRIKE`;
       const url = SHARE_URL;
-      if (navigator.share) {
+      const nativeShare = plugin('Share');
+      if (nativeShare) {
+        try { await nativeShare.share({ title: 'JET STRIKE 〜音速の翼〜', text, url, dialogTitle: '結果をシェア' }); } catch (e) { /* キャンセル */ }
+      } else if (navigator.share) {
         const data = { title: 'JET STRIKE 〜音速の翼〜', text };
         data.url = url;
         if (shotBlob) {
@@ -604,7 +635,7 @@
         G.ready = true;
         // 給油が終わったら発艦位置へ
         placeOnDeck(CAT_Z);
-        showMsg('給油完了！', 'SPACE / ENTER で発艦', 3);
+        showMsg('給油完了！', `${KEY.launch}で発艦`, 3);
         Sfx.beep(880, 0.12); Sfx.beep(1320, 0.18);
       }
     }
@@ -741,12 +772,12 @@
     const d = c.pos.distanceTo(player.pos);
     if (!G.guide.found && d < 5000) {
       G.guide.found = true;
-      showMsg('敵空母を発見！', '照準に入れてロックオン → 赤い LOCK が出たら F でミサイル発射！', 4.5);
+      showMsg('敵空母を発見！', `照準に入れてロックオン → 赤い LOCK が出たら ${KEY.msl}でミサイル発射！`, 4.5);
       Sfx.beep(880, 0.1); Sfx.beep(1320, 0.15);
     }
     if (G.guide.found && !G.guide.mslOut && player.msl === 0 && missiles.length === 0 && d < 8000) {
       G.guide.mslOut = true;
-      showMsg('ミサイル切れ！', '機銃（SPACE）で甲板を狙え ／ 母艦で補給して再攻撃もアリ', 4.5);
+      showMsg('ミサイル切れ！', `${KEY.gun}の機銃で甲板を狙え ／ 母艦で補給して再攻撃もアリ`, 4.5);
     }
   }
 
@@ -1358,7 +1389,7 @@
     if (G.state === 'flight') {
       const homeD = Math.hypot(p.pos.x - home.pos.x, p.pos.z - home.pos.z);
       const need = homeD / 250 * 0.8 + 6; // 巡航で帰るのに必要な燃料の目安
-      if (p.fuel <= 0) warn = 'FLAME OUT — Lキーで着艦できる距離まで滑空せよ';
+      if (p.fuel <= 0) warn = `FLAME OUT — ${KEY.land}で着艦できる距離まで滑空せよ`;
       else if (p.fuel < 15 || p.fuel < need) warn = 'BINGO FUEL!! 今すぐ母艦へ帰還せよ';
       else if (p.fuel < 35) warn = 'FUEL LOW — 母艦へ帰還せよ';
       if (p.hp < 30) warn = (warn ? warn + '<br>' : '') + 'DAMAGE CRITICAL';
@@ -1372,17 +1403,17 @@
     setHtml(h.warning, warn ? `<span class="blink">${warn}</span>` : '');
 
     let hint = '';
-    if (G.state === 'deck') hint = G.ready ? '<span class="blink">SPACE / ENTER : 発艦！</span>' : `給油・補給中… ${Math.floor(p.fuel)}%`;
-    else if (G.state === 'flight' && inLandingZone()) hint = `<span class="blink" style="color:#50ff8a">L : 着艦アプローチ</span>`;
+    if (G.state === 'deck') hint = G.ready ? `<span class="blink">${KEY.launch}で発艦！</span>` : `給油・補給中… ${Math.floor(p.fuel)}%`;
+    else if (G.state === 'flight' && inLandingZone()) hint = `<span class="blink" style="color:#50ff8a">${KEY.land}で着艦アプローチ</span>`;
     else if (G.state === 'flight' && p.fuel < 35) hint = '<span style="color:#ffc23b">緑の HOME マーカーの方向へ飛べ</span>';
     else if (G.state === 'flight' && enemyCarrier && enemyCarrier.alive && enemyCarrier.pos.distanceTo(p.pos) < 6000) {
       const lockC = p.lockTarget === enemyCarrier;
-      if (p.msl > 0 && lockC && p.locked) hint = '<span class="blink" style="color:#ff6050">LOCK!　F でミサイル発射！</span>';
+      if (p.msl > 0 && lockC && p.locked) hint = `<span class="blink" style="color:#ff6050">LOCK!　${KEY.msl}でミサイル発射！</span>`;
       else if (p.msl > 0 && lockC) hint = '<span style="color:#ffd040">そのまま空母を照準に入れ続けろ… ロックオン中</span>';
       else if (p.msl > 0 && p.lockTarget) hint = '<span style="color:#ffd040">敵機をロック中 — 空母を狙うなら照準を空母へ合わせ直せ</span>';
       else if (p.msl > 0) hint = '<span style="color:#ffd040">赤い TARGET（敵空母）を照準の円に入れてロックオン</span>';
-      else if (p.ammo > 0) hint = '<span style="color:#ffd040">SPACE で甲板を機銃掃射 — 急降下しすぎて海に突っ込むな</span>';
-      else hint = '<span style="color:#ffc23b">弾切れ — 母艦へ戻って補給しよう（近くで L で着艦）</span>';
+      else if (p.ammo > 0) hint = `<span style="color:#ffd040">${KEY.gun}で甲板を機銃掃射 — 急降下しすぎて海に突っ込むな</span>`;
+      else hint = `<span style="color:#ffc23b">弾切れ — 母艦へ戻って補給しよう（近くで${KEY.land}で着艦）</span>`;
     }
     setHtml(h.hint, hint);
 
@@ -1417,7 +1448,7 @@
           if (G.lives > 0) {
             resupply();
             enterDeck(false);
-            showMsg('再出撃準備完了', 'SPACE / ENTER で発艦', 2.5);
+            showMsg('再出撃準備完了', `${KEY.launch}で発艦`, 2.5);
           } else gameOver();
         }
         break;
