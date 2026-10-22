@@ -195,6 +195,10 @@
   if (isTouch) document.body.classList.add('touch');
   $('pause').addEventListener('pointerdown', () => setPaused(false));
 
+  // EU など同意が必要な地域では、タイトル画面から広告の同意内容を変更できるようにする
+  Ads.initDone.then(() => { if (Ads.privacyOptionsRequired) $('adPrivacy').classList.remove('hidden'); });
+  $('adPrivacyLink').addEventListener('click', e => { e.preventDefault(); Ads.showPrivacyOptions(); });
+
   $('startBtn').addEventListener('click', () => { Sfx.init(); startGame(); });
   // 2 回に 1 回、「もう一度」の前に全画面広告を出す（Android アプリのみ）
   let retryBusy = false;

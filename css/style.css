@@ -140,3 +140,8 @@ body.touch .kb, body.touch .controls { display: none; }
 .cont-count { font-size: 64px; font-weight: bold; color: #fff; text-shadow: 0 0 20px #ff6a00; margin-bottom: 10px; }
 @media (max-height: 500px) { .cont-count { font-size: 40px; margin-bottom: 4px; } .cont-lead { font-size: 13px; } }
 #continue .btn { white-space: nowrap; font-size: 17px; padding: 12px 14px; letter-spacing: 0; }
+
+/* タイトル画面のプライバシーポリシー・広告設定リンク */
+.legal { margin-top: 12px; font-size: 13px; color: #b8c7d8; }
+.legal a { color: #b8c7d8; text-decoration: underline; padding: 6px 4px; }
+@media (max-height: 500px) { .legal { margin-top: 4px; font-size: 12px; } }

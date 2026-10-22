@@ -20,6 +20,7 @@ const Ads = (() => {
   let ready = false;           // 広告をリクエストしてよい状態（同意確認が済んだ）
   let interLoaded = false, rewardLoaded = false;
   let showing = false;
+  let privacyRequired = false; // 「広告の設定」を利用者が開けるようにする必要があるか（EU など）
   const waiters = {};          // 表示中の広告が閉じたときに呼ぶ処理
 
   function prepareInterstitial() {
@@ -50,6 +51,7 @@ const Ads = (() => {
       let consent = await AdMob.requestConsentInfo();
       if (consent.status === 'REQUIRED' && consent.isConsentFormAvailable) consent = await AdMob.showConsentForm();
       ready = consent.canRequestAds !== false;
+      privacyRequired = consent.privacyOptionsRequirementStatus === 'REQUIRED';
     } catch (e) {
       ready = false;
     }
@@ -86,12 +88,21 @@ const Ads = (() => {
     });
   }
 
-  if (AdMob) init();
+  // 同意した内容をあとから変更するための Google のフォームを開く
+  function showPrivacyOptions() {
+    if (!AdMob) return Promise.resolve();
+    return AdMob.showPrivacyOptionsForm().catch(() => {});
+  }
+
+  const initDone = AdMob ? init() : Promise.resolve();
 
   return {
     get available() { return !!AdMob; },
     get showing() { return showing; },
     get rewardedReady() { return !!AdMob && ready && rewardLoaded; },
+    get privacyOptionsRequired() { return privacyRequired; },
+    initDone,
+    showPrivacyOptions,
     showInterstitial,
     showRewarded,
   };

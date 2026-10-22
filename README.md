@@ -63,7 +63,8 @@ Android アプリでのみ広告を表示します（Web 版には広告は出�
 | インタースティシャル（全画面） | ゲームオーバー後に「もう一度」を押したとき、2 回に 1 回 |
 | リワード | 最後の残機を失ったときの「CONTINUE?」画面で「広告を見て続行」を選ぶと、残機 +1 で再出撃（1 ゲーム 1 回まで、10 秒で自動的にゲームオーバー） |
 
-- EU・英国など同意が必要な地域では、初回起動時に Google の同意確認画面が出ます。
+- EU・英国など同意が必要な地域では、初回起動時に Google の同意確認画面が出ます。その地域では、タイトル画面の「広告の設定」から同意内容をいつでも変更できます。
+- プライバシーポリシー（https://techgym.jp/privacy-policy/ ）へのリンクをタイトル画面に表示しています。Play Console の「アプリのコンテンツ」→「プライバシー ポリシー」にも同じ URL を登録します。
 - 広告 ID は `js/ads.js`、AdMob のアプリ ID は `android/app/src/main/res/values/strings.xml` にあります。
 - 動作確認用 APK（Release の `jet-strike.apk`）は常に **Google のテスト広告** を表示します。自分でタップしても問題ありません。
 - Google Play 用の .aab をビルドするときだけ、CI が `ADMOB_MODE=production` で本番の広告に切り替えます（`scripts/build-web.js` が `js/ads-config.js` を書き換えます）。
