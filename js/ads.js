@@ -11,30 +11,44 @@ const Ads = (() => {
       rewarded: 'ca-app-pub-6411535997477460/9640105652',
     },
   };
+  const RETRY_MS = 20000;      // 読み込みに失敗したら少し待って再挑戦する
   const cap = window.Capacitor;
   const native = !!(cap && cap.isNativePlatform && cap.isNativePlatform());
   const AdMob = native && cap.Plugins ? cap.Plugins.AdMob : null;
   const testing = window.AD_MODE !== 'production';
   const ids = testing ? UNITS.test : UNITS.production;
 
-  let ready = false;           // 広告をリクエストしてよい状態（同意確認が済んだ）
-  let interLoaded = false, rewardLoaded = false;
+  let ready = false;           // 広告をリクエストしてよい状態（初期化と同意確認が済んだ）
   let showing = false;
   let privacyRequired = false; // 「広告の設定」を利用者が開けるようにする必要があるか（EU など）
   const waiters = {};          // 表示中の広告が閉じたときに呼ぶ処理
 
-  function prepareInterstitial() {
-    if (!ready) return;
-    AdMob.prepareInterstitial({ adId: ids.interstitial, isTesting: testing })
-      .then(() => { interLoaded = true; })
-      .catch(() => { interLoaded = false; });
+  // 広告の種類ごとの読み込み状態
+  const slots = {
+    inter: { loaded: false, pending: null, load: () => AdMob.prepareInterstitial({ adId: ids.interstitial, isTesting: testing }) },
+    reward: { loaded: false, pending: null, load: () => AdMob.prepareRewardVideoAd({ adId: ids.rewarded, isTesting: testing }) },
+  };
+
+  // 読み込みを始め、読み込めたら true で resolve する Promise を返す（読み込み中なら同じ Promise）
+  function prepare(kind) {
+    const s = slots[kind];
+    if (!ready) return Promise.resolve(false);
+    if (s.loaded) return Promise.resolve(true);
+    if (!s.pending) {
+      s.pending = s.load()
+        .then(() => { s.loaded = true; return true; })
+        .catch(() => { setTimeout(() => prepare(kind), RETRY_MS); return false; })
+        .finally(() => { s.pending = null; });
+    }
+    return s.pending;
   }
-  function prepareRewarded() {
-    if (!ready) return;
-    AdMob.prepareRewardVideoAd({ adId: ids.rewarded, isTesting: testing })
-      .then(() => { rewardLoaded = true; })
-      .catch(() => { rewardLoaded = false; });
+
+  // 読み込み済みでなければ、最大 timeout ミリ秒だけ読み込みを待つ
+  function ensureLoaded(kind, timeout) {
+    if (slots[kind].loaded) return Promise.resolve(true);
+    return Promise.race([prepare(kind), new Promise(r => setTimeout(() => r(false), timeout))]);
   }
+
   function finish(kind, result) {
     showing = false;
     Sfx.resume();
@@ -44,46 +58,52 @@ const Ads = (() => {
   }
 
   async function init() {
-    if (!AdMob) return;
     try {
       await AdMob.initialize({ initializeForTesting: testing });
-      // EU・英国などで必要な広告の同意確認（必要な地域でだけフォームが出る）
+    } catch (e) {
+      return;
+    }
+    // EU・英国などで必要な広告の同意確認（必要な地域でだけフォームが出る）。
+    // 確認自体が失敗した場合（AdMob 側でメッセージ未設定など）は、同意不要の地域とみなして続ける
+    try {
       let consent = await AdMob.requestConsentInfo();
       if (consent.status === 'REQUIRED' && consent.isConsentFormAvailable) consent = await AdMob.showConsentForm();
       ready = consent.canRequestAds !== false;
       privacyRequired = consent.privacyOptionsRequirementStatus === 'REQUIRED';
     } catch (e) {
-      ready = false;
+      ready = true;
     }
     let rewarded = false;
     AdMob.addListener('interstitialAdDismissed', () => finish('inter'));
     AdMob.addListener('interstitialAdFailedToShow', () => finish('inter'));
-    AdMob.addListener('onRewardedVideoAdReward', () => { rewarded = true; });
     AdMob.addListener('onRewardedVideoAdShowed', () => { rewarded = false; });
+    AdMob.addListener('onRewardedVideoAdReward', () => { rewarded = true; });
     AdMob.addListener('onRewardedVideoAdDismissed', () => finish('reward', rewarded));
     AdMob.addListener('onRewardedVideoAdFailedToShow', () => finish('reward', false));
-    prepareInterstitial();
-    prepareRewarded();
+    prepare('inter');
+    prepare('reward');
   }
 
-  // 全画面広告を表示し、閉じられたら resolve する（表示できないときはすぐ resolve）
+  // 全画面広告を表示し、閉じられたら resolve する（読み込めていないときは出さずにすぐ resolve）
   function showInterstitial() {
-    if (!AdMob || !ready || !interLoaded || showing) return Promise.resolve();
-    showing = true; interLoaded = false;
+    if (!AdMob || !ready || !slots.inter.loaded || showing) return Promise.resolve();
+    showing = true; slots.inter.loaded = false;
     Sfx.suspend();
     return new Promise(resolve => {
-      waiters.inter = () => { prepareInterstitial(); resolve(); };
+      waiters.inter = () => { prepare('inter'); resolve(); };
       AdMob.showInterstitial().catch(() => finish('inter'));
     });
   }
 
-  // リワード広告を表示し、最後まで見て報酬を得たら true で resolve する
-  function showRewarded() {
-    if (!AdMob || !ready || !rewardLoaded || showing) return Promise.resolve(false);
-    showing = true; rewardLoaded = false;
+  // リワード広告を表示する。結果は 'rewarded'（最後まで見た）/ 'skipped'（途中で閉じた）/ 'unavailable'（読み込めなかった）
+  async function showRewarded() {
+    if (!AdMob || showing) return 'unavailable';
+    await initDone;
+    if (!ready || !(await ensureLoaded('reward', 8000))) return 'unavailable';
+    showing = true; slots.reward.loaded = false;
     Sfx.suspend();
     return new Promise(resolve => {
-      waiters.reward = ok => { prepareRewarded(); resolve(!!ok); };
+      waiters.reward = ok => { prepare('reward'); resolve(ok ? 'rewarded' : 'skipped'); };
       AdMob.showRewardVideoAd().catch(() => finish('reward', false));
     });
   }
@@ -99,11 +119,10 @@ const Ads = (() => {
   return {
     get available() { return !!AdMob; },
     get showing() { return showing; },
-    get rewardedReady() { return !!AdMob && ready && rewardLoaded; },
     get privacyOptionsRequired() { return privacyRequired; },
     initDone,
-    showPrivacyOptions,
     showInterstitial,
     showRewarded,
+    showPrivacyOptions,
   };
 })();

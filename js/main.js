@@ -195,6 +195,9 @@
   if (isTouch) document.body.classList.add('touch');
   $('pause').addEventListener('pointerdown', () => setPaused(false));
 
+  // どのビルドが入っているか分かるよう、アプリ版はタイトル画面にバージョンを出す
+  if (window.APP_VERSION && window.APP_VERSION !== 'dev') $('buildInfo').textContent = window.APP_VERSION;
+
   // EU など同意が必要な地域では、タイトル画面から広告の同意内容を変更できるようにする
   Ads.initDone.then(() => { if (Ads.privacyOptionsRequired) $('adPrivacy').classList.remove('hidden'); });
   $('adPrivacyLink').addEventListener('click', e => { e.preventDefault(); Ads.showPrivacyOptions(); });
@@ -215,9 +218,14 @@
   });
 
   // ---------------------------------------------------------------- リワード広告で続行
-  function canContinue() { return !G.continued && Ads.rewardedReady; }
+  // Android アプリでは広告の読み込み状況にかかわらず続行を提案する（押されたときに読み込む）
+  let contBusy = false;
+  function canContinue() { return !G.continued && Ads.available; }
   function showContinue() {
-    G.state = 'continue'; G.contT = 10;
+    G.state = 'continue'; G.contT = 10; contBusy = false;
+    $('contWatch').disabled = false;
+    $('contWatch').textContent = '▶ 広告を見て続行';
+    $('contNote').textContent = '';
     $('continue').classList.remove('hidden');
     $('touch').classList.add('hidden');
   }
@@ -225,11 +233,19 @@
   function giveUp() { if (G.state !== 'continue') return; hideContinue(); gameOver(); }
   $('contGiveUp').addEventListener('click', giveUp);
   $('contWatch').addEventListener('click', async () => {
-    if (G.state !== 'continue' || Ads.showing) return;
-    const ok = await Ads.showRewarded();
+    if (G.state !== 'continue' || contBusy) return;
+    contBusy = true;
+    $('contWatch').disabled = true;
+    $('contWatch').textContent = '広告を読み込み中…';
+    const result = await Ads.showRewarded();
     if (G.state !== 'continue') return;
+    if (result === 'unavailable') {
+      $('contNote').textContent = '広告を読み込めませんでした（通信状態を確認してください）';
+      setTimeout(giveUp, 2200);
+      return;
+    }
     hideContinue();
-    if (!ok) { gameOver(); return; }
+    if (result !== 'rewarded') { gameOver(); return; }
     G.continued = true;
     G.lives = 1;
     resupply();
@@ -1497,8 +1513,8 @@
         }
         break;
       case 'continue':
-        // 広告を見ている間はカウントダウンを止める
-        if (!Ads.showing) {
+        // 広告の読み込み中・表示中はカウントダウンを止める
+        if (!contBusy) {
           G.contT -= dt;
           setText($('contCount'), Math.max(0, Math.ceil(G.contT)));
           if (G.contT <= 0) giveUp();

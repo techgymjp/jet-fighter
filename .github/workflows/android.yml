@@ -40,13 +40,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Set version name
+        run: echo "VERSION_NAME=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
+
       - name: Copy web assets into the Android project
         run: |
           npm run build
           npx cap sync android
-
-      - name: Set version name
-        run: echo "VERSION_NAME=$(node -p "require('./package.json').version")" >> "$GITHUB_ENV"
 
       - name: Build debug APK
         working-directory: android

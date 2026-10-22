@@ -145,3 +145,6 @@ body.touch .kb, body.touch .controls { display: none; }
 .legal { margin-top: 12px; font-size: 13px; color: #b8c7d8; }
 .legal a { color: #b8c7d8; text-decoration: underline; padding: 6px 4px; }
 @media (max-height: 500px) { .legal { margin-top: 4px; font-size: 12px; } }
+.cont-note { min-height: 1.2em; font-size: 14px; color: #ffb36b; margin-bottom: 6px; }
+#continue .btn:disabled { opacity: .7; }
+#buildInfo { margin-right: 10px; opacity: .8; }

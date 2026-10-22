@@ -63,6 +63,7 @@
   </table>
   <p class="best">HIGH SCORE <span id="best">0</span></p>
   <p class="legal">
+    <span id="buildInfo"></span>
     <a href="https://techgym.jp/privacy-policy/" target="_blank" rel="noopener">プライバシーポリシー</a>
     <span id="adPrivacy" class="hidden">｜<a href="#" id="adPrivacyLink">広告の設定</a></span>
   </p>
@@ -88,6 +89,7 @@
     <div class="res-head">CONTINUE?</div>
     <p class="cont-lead">広告を見ると、残機 +1 で母艦から再出撃できます<br><small>（1 ゲームにつき 1 回まで）</small></p>
     <div class="cont-count"><span id="contCount">10</span></div>
+    <p id="contNote" class="cont-note"></p>
     <div class="btns">
       <button id="contWatch" class="btn">▶ 広告を見て続行</button>
       <button id="contGiveUp" class="btn ghost">あきらめる</button>
@@ -111,6 +113,7 @@
 
 <script src="js/vendor/three.min.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/build-info.js"></script>
 <script src="js/ads-config.js"></script>
 <script src="js/ads.js"></script>
 <script src="js/models.js"></script>
