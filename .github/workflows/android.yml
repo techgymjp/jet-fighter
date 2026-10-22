@@ -17,6 +17,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # 通常は 2〜3 分で終わる。途中で固まっても何時間も待たされないようにする
+    timeout-minutes: 25
     permissions:
       contents: write   # Release に APK を載せるため
     env:
@@ -38,6 +40,7 @@ jobs:
           cache: gradle
 
       - name: Install dependencies
+        timeout-minutes: 5
         run: npm ci
 
       - name: Set version name
