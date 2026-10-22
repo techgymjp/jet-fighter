@@ -41,6 +41,10 @@
 
 ゲームオーバー画面には、スコア・称号・撃墜数や最高速度などの戦績表・次回へのヒントを表示します。「シェア」ボタンでは、スマホなど共有機能のある端末では共有シート（対応端末は最後の瞬間の画像つき）、それ以外では X の投稿画面が開きます。シェアにはゲーム紹介記事の URL（https://techgym.jp/column/claude-code-game-jet-fighter/）が付きます。
 
+## Web 版の公開（Vercel）
+
+`vercel.json` で、Vercel が `npm run build` を実行して `www/` を公開するよう設定しています（Android アプリに同梱するのと同じファイルです）。
+
 ## Android 版（Google Play 配布用）
 
 [Capacitor](https://capacitorjs.com/) でゲームのファイルをアプリ内に同梱しているため、ネットにつながっていなくても遊べます。
