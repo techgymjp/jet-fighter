@@ -188,6 +188,7 @@
   if (plugin('App')) {
     plugin('App').addListener('backButton', () => {
       if (G.state === 'title' || G.state === 'gameover') plugin('App').exitApp();
+      else if (G.state === 'continue') giveUp();
       else togglePause();
     });
   }
@@ -195,14 +196,52 @@
   $('pause').addEventListener('pointerdown', () => setPaused(false));
 
   $('startBtn').addEventListener('click', () => { Sfx.init(); startGame(); });
-  $('retryBtn').addEventListener('click', () => { Sfx.init(); startGame(); });
+  // 2 回に 1 回、「もう一度」の前に全画面広告を出す（Android アプリのみ）
+  let retryBusy = false;
+  $('retryBtn').addEventListener('click', async () => {
+    if (retryBusy) return;
+    Sfx.init();
+    G.gameOvers = (G.gameOvers || 0) + 1;
+    if (Ads.available && G.gameOvers % 2 === 0) {
+      retryBusy = true;
+      await Ads.showInterstitial();
+      retryBusy = false;
+    }
+    startGame();
+  });
+
+  // ---------------------------------------------------------------- リワード広告で続行
+  function canContinue() { return !G.continued && Ads.rewardedReady; }
+  function showContinue() {
+    G.state = 'continue'; G.contT = 10;
+    $('continue').classList.remove('hidden');
+    $('touch').classList.add('hidden');
+  }
+  function hideContinue() { $('continue').classList.add('hidden'); }
+  function giveUp() { if (G.state !== 'continue') return; hideContinue(); gameOver(); }
+  $('contGiveUp').addEventListener('click', giveUp);
+  $('contWatch').addEventListener('click', async () => {
+    if (G.state !== 'continue' || Ads.showing) return;
+    const ok = await Ads.showRewarded();
+    if (G.state !== 'continue') return;
+    hideContinue();
+    if (!ok) { gameOver(); return; }
+    G.continued = true;
+    G.lives = 1;
+    resupply();
+    enterDeck(false);
+    setPaused(false);
+    $('touch').classList.toggle('hidden', !isTouch);
+    showMsg('CONTINUE!', `残機 +1　${KEY.launch}で再出撃`, 3);
+  });
 
   function togglePause() {
     if (G.state === 'title' || G.state === 'gameover') return;
     setPaused(!G.paused);
   }
   function setPaused(on) {
-    if (G.state === 'title' || G.state === 'gameover') return;
+    // 続行確認中（広告表示中を含む）はポーズ画面を出さない
+    if (G.state === 'title' || G.state === 'gameover' || G.state === 'continue') return;
     G.paused = on;
     $('pause').classList.toggle('hidden', !G.paused);
     if (G.paused) Sfx.engine(false, 0, 0, 0);
@@ -237,7 +276,7 @@
   function startGame() {
     clearWorld();
     G.stats = { sunk: 0, landings: 0, maxSpeed: 0, flightTime: 0, fuelOuts: 0 };
-    G.score = 0; G.kills = 0; G.stage = 1; G.lives = 3; G.stageClearT = 0; G.paused = false;
+    G.score = 0; G.kills = 0; G.stage = 1; G.lives = 3; G.stageClearT = 0; G.paused = false; G.continued = false;
     $('title').classList.add('hidden'); $('gameover').classList.add('hidden'); $('pause').classList.add('hidden');
     $('hud').classList.remove('hidden');
     $('touch').classList.toggle('hidden', !isTouch);
@@ -1119,7 +1158,7 @@
       lookQuat(camDesP, _v1.copy(p.pos).add(_v2.set(0, 1.5, 0)), camDesQ);
       targetFov = 55;
       camQuat.copy(p.quat);
-    } else if (G.state === 'dead') {
+    } else if (G.state === 'dead' || G.state === 'continue') {
       G.orbitA += dt * 0.25;
       camDesP.set(Math.sin(G.orbitA) * 230, 95, Math.cos(G.orbitA) * 230).add(G.deathPos);
       lookQuat(camDesP, G.deathPos, camDesQ);
@@ -1449,7 +1488,16 @@
             resupply();
             enterDeck(false);
             showMsg('再出撃準備完了', `${KEY.launch}で発艦`, 2.5);
-          } else gameOver();
+          } else if (canContinue()) showContinue();
+          else gameOver();
+        }
+        break;
+      case 'continue':
+        // 広告を見ている間はカウントダウンを止める
+        if (!Ads.showing) {
+          G.contT -= dt;
+          setText($('contCount'), Math.max(0, Math.ceil(G.contT)));
+          if (G.contT <= 0) giveUp();
         }
         break;
     }
@@ -1481,7 +1529,7 @@
     FX.update(dt);
     world.update(camera.position);
     const pv = player.speed / 450;
-    Sfx.engine(G.state !== 'dead' && G.state !== 'title' && G.state !== 'gameover' && player.fuel > 0,
+    Sfx.engine(G.state !== 'dead' && G.state !== 'continue' && G.state !== 'title' && G.state !== 'gameover' && player.fuel > 0,
       G.state === 'deck' ? 0.2 : 0.6, flyingish ? clamp(pv, 0, 1) : 0, player.ab);
 
     renderer.render(scene, camera);

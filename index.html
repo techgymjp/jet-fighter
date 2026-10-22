@@ -79,6 +79,18 @@
   </div>
 </div>
 
+<div id="continue" class="screen hidden">
+  <div class="card">
+    <div class="res-head">CONTINUE?</div>
+    <p class="cont-lead">広告を見ると、残機 +1 で母艦から再出撃できます<br><small>（1 ゲームにつき 1 回まで）</small></p>
+    <div class="cont-count"><span id="contCount">10</span></div>
+    <div class="btns">
+      <button id="contWatch" class="btn">▶ 広告を見て続行</button>
+      <button id="contGiveUp" class="btn ghost">あきらめる</button>
+    </div>
+  </div>
+</div>
+
 <div id="pause" class="screen hidden"><h1>PAUSE</h1><p class="lead"><span class="kb">P キーで再開</span><span class="tc">画面をタップで再開</span></p></div>
 
 <div id="touch" class="hidden">
@@ -95,6 +107,8 @@
 
 <script src="js/vendor/three.min.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/ads-config.js"></script>
+<script src="js/ads.js"></script>
 <script src="js/models.js"></script>
 <script src="js/effects.js"></script>
 <script src="js/main.js"></script>

@@ -4,4 +4,5 @@
     <string name="title_activity_main">JET STRIKE</string>
     <string name="package_name">jp.techgym.jetstrike</string>
     <string name="custom_url_scheme">jp.techgym.jetstrike</string>
+    <string name="admob_app_id">ca-app-pub-6411535997477460~7640628273</string>
 </resources>

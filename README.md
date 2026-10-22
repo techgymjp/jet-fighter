@@ -54,6 +54,21 @@
 
 アプリ ID は `jp.techgym.jetstrike` です（Google Play に一度公開すると変更できません）。
 
+### 広告（Google AdMob）
+
+Android アプリでのみ広告を表示します（Web 版には広告は出ません）。
+
+| 広告 | タイミング |
+| --- | --- |
+| インタースティシャル（全画面） | ゲームオーバー後に「もう一度」を押したとき、2 回に 1 回 |
+| リワード | 最後の残機を失ったときの「CONTINUE?」画面で「広告を見て続行」を選ぶと、残機 +1 で再出撃（1 ゲーム 1 回まで、10 秒で自動的にゲームオーバー） |
+
+- EU・英国など同意が必要な地域では、初回起動時に Google の同意確認画面が出ます。
+- 広告 ID は `js/ads.js`、AdMob のアプリ ID は `android/app/src/main/res/values/strings.xml` にあります。
+- 動作確認用 APK（Release の `jet-strike.apk`）は常に **Google のテスト広告** を表示します。自分でタップしても問題ありません。
+- Google Play 用の .aab をビルドするときだけ、CI が `ADMOB_MODE=production` で本番の広告に切り替えます（`scripts/build-web.js` が `js/ads-config.js` を書き換えます）。
+- 本番の広告を自分でタップするとアカウント停止の対象になるので注意してください。
+
 ### ビルド方法
 
 **GitHub Actions（自動）**: Web 版や `android/` を変更して push すると、`.github/workflows/android.yml` が動作確認用の APK を作ります。
@@ -91,7 +106,8 @@ npm run android:open   # Android Studio で開く
    | `ANDROID_KEY_PASSWORD` | 鍵のパスワード |
 3. Actions の「Android build」を実行すると、署名済みの `jet-strike-release-aab`（.aab）ができる
 4. [Google Play Console](https://play.google.com/console) でアプリを作成し、.aab をアップロードする
-   （ストア掲載情報・スクリーンショット・プライバシーポリシー・コンテンツのレーティングなどの入力が必要です）
+   （ストア掲載情報・スクリーンショット・プライバシーポリシー・コンテンツのレーティングなどの入力が必要です。
+   広告を入れているので「広告を含む」の申告、データセーフティでの広告 ID の申告、デベロッパーのサイトへの app-ads.txt の設置も必要です）
 
 バージョン番号（versionCode）は Actions の実行回数が自動で使われます。表示用のバージョン名は `package.json` の `version` です。
 
@@ -113,6 +129,8 @@ js/main.js        ゲームロジック（飛行・戦闘・着艦・給油・�
 js/effects.js     爆発・煙・曳光弾・スピードラインなどのエフェクト
 js/models.js      戦闘機・空母・海・空・雲のモデル生成
 js/audio.js       効果音（WebAudio 合成）
+js/ads.js         Google AdMob 広告（Android アプリのみ）
+js/ads-config.js  広告のモード（test / production）
 js/vendor/        Three.js r160（MIT License）
 icon.svg          アプリアイコンの元画像（assets/ に Android 用の元画像）
 android/          Android アプリのプロジェクト（Capacitor）

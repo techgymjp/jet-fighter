@@ -75,7 +75,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; colo
 }
 
 /* ゲームオーバー画面：結果カード（ちゃぶ台返しリメンバーの結果画面に合わせた構成） */
-#gameover .card { width: min(440px, 92vw); padding: 22px 24px 18px; border-radius: 18px;
+#gameover .card, #continue .card { width: min(440px, 92vw); padding: 22px 24px 18px; border-radius: 18px;
   background: rgba(8, 16, 30, .82); border: 2px solid rgba(255, 140, 40, .7);
   box-shadow: 0 0 40px rgba(255, 90, 0, .35), 0 10px 30px rgba(0, 0, 0, .6); }
 .res-head { font-size: 22px; letter-spacing: 8px; color: #ffb36b; font-style: italic; font-weight: bold; }
@@ -95,7 +95,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; colo
   .res-score { font-size: 48px; }
   .res-table { font-size: 13px; }
   .res-table th, .res-table td { padding: 3px 6px; }
-  #gameover .card { padding: 14px 16px 12px; }
+  #gameover .card, #continue .card { padding: 14px 16px 12px; }
 }
 
 /* 敵空母ゲージ：被弾時に白く光って揺れる */
@@ -133,3 +133,10 @@ body.touch .kb, body.touch .controls { display: none; }
   #btns { bottom: 14px; right: 12px; grid-template-columns: repeat(3, 70px); gap: 8px; }
   #btns button { height: 52px; font-size: 14px; }
 }
+
+/* リワード広告で続行する確認画面 */
+.cont-lead { font-size: 16px; line-height: 1.6; margin: 10px 0 4px; }
+.cont-lead small { color: #b8c7d8; }
+.cont-count { font-size: 64px; font-weight: bold; color: #fff; text-shadow: 0 0 20px #ff6a00; margin-bottom: 10px; }
+@media (max-height: 500px) { .cont-count { font-size: 40px; margin-bottom: 4px; } .cont-lead { font-size: 13px; } }
+#continue .btn { white-space: nowrap; font-size: 17px; padding: 12px 14px; letter-spacing: 0; }

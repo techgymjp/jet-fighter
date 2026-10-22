@@ -87,6 +87,13 @@ jobs:
           echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/upload.jks"
           echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
 
+      # Google Play 版だけ本番の広告 ID に切り替える（動作確認用 APK はテスト広告のまま）
+      - name: Switch ads to production for the release build
+        if: env.HAS_KEYSTORE == 'true'
+        run: |
+          ADMOB_MODE=production npm run build
+          npx cap copy android
+
       - name: Build signed release AAB (Google Play)
         if: env.HAS_KEYSTORE == 'true'
         working-directory: android
