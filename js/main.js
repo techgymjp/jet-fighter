@@ -77,6 +77,7 @@
   };
   scene.add(player.mesh);
   const MAX_AMMO = 1000, MAX_MSL = 4;
+  const GUN_DMG_CARRIER = 0.8, MSL_DMG_CARRIER = 12;
 
   function axes(o) {
     o.fwd.set(0, 0, -1).applyQuaternion(o.quat);
@@ -88,7 +89,7 @@
     state: 'title', t: 0, st: 0, score: 0, kills: 0, stats: null, stage: 1, lives: 3, best: 0,
     shake: 0, dmgFlash: 0, camMode: 'chase', invert: false, paused: false, camBlend: 1, orbitA: 0,
     launchPhase: '', catSpeed: 0, refuel: false, ready: false, stageClearT: 0, deathPos: new V3(),
-    land: null, warnT: 0, fade: 0, fadeDir: 0, onFadeMid: null,
+    land: null, warnT: 0, ecHitT: 0, guide: { found: false, mslOut: false }, fade: 0, fadeDir: 0, onFadeMid: null,
   };
   try { G.best = +localStorage.getItem('jetstrike_best') || 0; } catch (e) { /* 保存不可 */ }
   $('best').textContent = G.best;
@@ -257,6 +258,7 @@
     if (G.state !== 'deck' || !G.ready) return;
     placeOnDeck(CAT_Z);
     G.state = 'launch'; G.st = 0; G.launchPhase = 'spool'; G.catSpeed = 0;
+    G.guide.found = false; G.guide.mslOut = false;
     G.camBlend = 0.05;
     Sfx.spool();
     showMsg('', 'カタパルト射出準備…', 1.2);
@@ -265,6 +267,7 @@
   function nextStage() {
     if (enemyCarrier) sinking.push(enemyCarrier);
     G.stage++;
+    G.guide.found = false; G.guide.mslOut = false;
     spawnStage();
     showMsg(`STAGE ${G.stage}`, '新たな敵空母艦隊を発見！ レーダーを確認せよ', 3.5);
     Sfx.beep(660, 0.15); Sfx.beep(990, 0.25);
@@ -639,7 +642,7 @@
           if (e.alive && segHit(b.o, b.p, e.pos, 14)) { hitEnemy(e, b.dmg, b.p); dead = true; break; }
         }
         if (!dead && enemyCarrier && enemyCarrier.alive && carrierHit(enemyCarrier, b.p)) {
-          damageCarrier(enemyCarrier, 0.4, b.p); dead = true;
+          damageCarrier(enemyCarrier, GUN_DMG_CARRIER, b.p); dead = true;
         }
       } else if (airborne()) {
         if (segHit(b.o, b.p, player.pos, b.flak ? 9 : 7)) { damagePlayer(b.dmg, b.p); dead = true; }
@@ -720,7 +723,7 @@
         FX.explosion(m.pos, 2.4);
         Sfx.boom(2.4, vol(m.pos, 6000));
         shakeAt(m.pos, 1.5, 2500);
-        damageCarrier(enemyCarrier, 12, m.pos);
+        damageCarrier(enemyCarrier, MSL_DMG_CARRIER, m.pos);
         boom = true;
       }
       if (!boom && (m.pos.y < 0 || m.life <= 0)) {
@@ -728,6 +731,22 @@
         boom = true;
       }
       if (boom) { scene.remove(m.mesh); missiles.splice(i, 1); }
+    }
+  }
+
+  // 敵空母エリアでの攻略ガイド
+  function updateGuide() {
+    const c = enemyCarrier;
+    if (G.state !== 'flight' || !c || !c.alive) return;
+    const d = c.pos.distanceTo(player.pos);
+    if (!G.guide.found && d < 5000) {
+      G.guide.found = true;
+      showMsg('敵空母を発見！', '照準に入れてロックオン → 赤い LOCK が出たら F でミサイル発射！', 4.5);
+      Sfx.beep(880, 0.1); Sfx.beep(1320, 0.15);
+    }
+    if (G.guide.found && !G.guide.mslOut && player.msl === 0 && missiles.length === 0 && d < 8000) {
+      G.guide.mslOut = true;
+      showMsg('ミサイル切れ！', '機銃（SPACE）で甲板を狙え ／ 母艦で補給して再攻撃もアリ', 4.5);
     }
   }
 
@@ -771,6 +790,7 @@
   function hitEnemy(e, dmg, at) {
     e.hp -= dmg;
     FX.hitSpark(at);
+    addHitMark(at, 'HIT', false);
     if (e.hp <= 0) killEnemy(e, false);
   }
 
@@ -874,10 +894,24 @@
   }
 
   // ---------------------------------------------------------------- 敵空母
+  // 命中位置に浮かび上がる「HIT」表示
+  const hitMarks = [];
+  let lastMarkT = -1;
+  function addHitMark(at, text, big) {
+    if (!big && G.t - lastMarkT < 0.12) return;
+    if (!big) lastMarkT = G.t;
+    hitMarks.push({ pos: at.clone(), text, big, t: 0, dur: big ? 1.4 : 0.6 });
+    if (hitMarks.length > 24) hitMarks.shift();
+    if (!big) Sfx.beep(2200, 0.03, 0.05);
+  }
+
   function damageCarrier(c, dmg, at) {
     if (!c.alive) return;
     c.hp -= dmg;
     FX.hitSpark(at, true);
+    const big = dmg >= MSL_DMG_CARRIER;
+    G.ecHitT = Math.max(G.ecHitT, big ? 0.6 : 0.2);
+    addHitMark(at, big ? `MISSILE HIT!  -${Math.round(dmg / c.maxHp * 100)}%` : 'HIT', big);
     const before = Math.floor((c.hp + dmg) / 6), after = Math.floor(c.hp / 6);
     if (after < before && c.fires.length < 12) {
       const lp = toLocal(c, at, new V3());
@@ -1145,7 +1179,7 @@
 
   const km = d => (d >= 1000 ? (d / 1000).toFixed(1) + 'km' : Math.round(d) + 'm');
 
-  function drawOverlay() {
+  function drawOverlay(dt) {
     octx.clearRect(0, 0, innerWidth, innerHeight);
     if (!['flight', 'landing', 'launch', 'deck'].includes(G.state)) return;
     const p = player;
@@ -1214,6 +1248,28 @@
       }
     }
 
+    // 命中表示
+    for (let i = hitMarks.length - 1; i >= 0; i--) {
+      const m = hitMarks[i];
+      m.t += dt;
+      if (m.t >= m.dur) { hitMarks.splice(i, 1); continue; }
+      const s = project(m.pos);
+      if (!s.on) continue;
+      const k = m.t / m.dur;
+      octx.save();
+      octx.globalAlpha = 1 - k * k;
+      octx.textAlign = 'center';
+      octx.font = m.big ? 'bold 30px monospace' : 'bold 16px monospace';
+      octx.lineWidth = m.big ? 5 : 3;
+      octx.strokeStyle = 'rgba(0,0,0,0.8)';
+      octx.fillStyle = m.big ? '#ffdd33' : '#ffffff';
+      const y = s.y - 18 - k * (m.big ? 60 : 30);
+      const sc = m.big ? 1 + Math.max(0, 0.4 - m.t) * 1.5 : 1;
+      octx.translate(s.x, y); octx.scale(sc, sc);
+      octx.strokeText(m.text, 0, 0); octx.fillText(m.text, 0, 0);
+      octx.restore();
+    }
+
     // 母艦
     {
       const tp = toWorld(home, _v2.set(0, 25, 0), _v4);
@@ -1266,7 +1322,7 @@
   }
 
   const hudEls = {};
-  ['score', 'stage', 'kills', 'lives', 'speed', 'mach', 'alt', 'thr', 'fuelBar', 'fuelTxt', 'hpBar', 'hpTxt', 'ammo', 'msl', 'warning', 'hint', 'ecWrap', 'ecBar', 'centerMsg', 'subMsg'].forEach(id => (hudEls[id] = $(id)));
+  ['score', 'stage', 'kills', 'lives', 'speed', 'mach', 'alt', 'thr', 'fuelBar', 'fuelTxt', 'hpBar', 'hpTxt', 'ammo', 'msl', 'warning', 'hint', 'ecWrap', 'ecBar', 'ecPct', 'centerMsg', 'subMsg'].forEach(id => (hudEls[id] = $(id)));
   const setText = (el, v) => { v = String(v); if (el._v !== v) { el._v = v; el.textContent = v; } };
   const setHtml = (el, v) => { if (el._h !== v) { el._h = v; el.innerHTML = v; } };
 
@@ -1288,7 +1344,13 @@
     setText(h.ammo, Math.floor(p.ammo)); setText(h.msl, p.msl);
     if (enemyCarrier && enemyCarrier.alive) {
       h.ecWrap.style.display = '';
-      h.ecBar.style.width = (enemyCarrier.hp / enemyCarrier.maxHp * 100) + '%';
+      const pct = enemyCarrier.hp / enemyCarrier.maxHp * 100;
+      h.ecBar.style.width = pct + '%';
+      setText(h.ecPct, Math.ceil(pct) + '%');
+      G.ecHitT = Math.max(0, G.ecHitT - dt);
+      const k = G.ecHitT * 14;
+      h.ecWrap.classList.toggle('hit', G.ecHitT > 0);
+      h.ecWrap.style.transform = G.ecHitT > 0 ? `translateX(-50%) translate(${rand(-k, k)}px,${rand(-k, k) * 0.5}px)` : '';
     } else h.ecWrap.style.display = 'none';
 
     // 警告
@@ -1313,6 +1375,15 @@
     if (G.state === 'deck') hint = G.ready ? '<span class="blink">SPACE / ENTER : 発艦！</span>' : `給油・補給中… ${Math.floor(p.fuel)}%`;
     else if (G.state === 'flight' && inLandingZone()) hint = `<span class="blink" style="color:#50ff8a">L : 着艦アプローチ</span>`;
     else if (G.state === 'flight' && p.fuel < 35) hint = '<span style="color:#ffc23b">緑の HOME マーカーの方向へ飛べ</span>';
+    else if (G.state === 'flight' && enemyCarrier && enemyCarrier.alive && enemyCarrier.pos.distanceTo(p.pos) < 6000) {
+      const lockC = p.lockTarget === enemyCarrier;
+      if (p.msl > 0 && lockC && p.locked) hint = '<span class="blink" style="color:#ff6050">LOCK!　F でミサイル発射！</span>';
+      else if (p.msl > 0 && lockC) hint = '<span style="color:#ffd040">そのまま空母を照準に入れ続けろ… ロックオン中</span>';
+      else if (p.msl > 0 && p.lockTarget) hint = '<span style="color:#ffd040">敵機をロック中 — 空母を狙うなら照準を空母へ合わせ直せ</span>';
+      else if (p.msl > 0) hint = '<span style="color:#ffd040">赤い TARGET（敵空母）を照準の円に入れてロックオン</span>';
+      else if (p.ammo > 0) hint = '<span style="color:#ffd040">SPACE で甲板を機銃掃射 — 急降下しすぎて海に突っ込むな</span>';
+      else hint = '<span style="color:#ffc23b">弾切れ — 母艦へ戻って補給しよう（近くで L で着艦）</span>';
+    }
     setHtml(h.hint, hint);
 
     if (msgT > 0) {
@@ -1329,7 +1400,7 @@
   let last = performance.now();
   function loop(now) {
     requestAnimationFrame(loop);
-    const dt = Math.min(0.05, (now - last) / 1000);
+    const dt = clamp((now - last) / 1000, 0, 0.05);
     last = now;
     if (G.paused) { renderer.render(scene, camera); return; }
     G.t += dt; G.st += dt;
@@ -1353,6 +1424,7 @@
     }
     if (G.state !== 'title' && G.state !== 'gameover') {
       updateLock(dt);
+      updateGuide();
       updateEnemies(dt);
       updateEnemyCarrier(dt);
       updateSinking(dt);
@@ -1387,7 +1459,7 @@
       renderer.domElement.toBlob(b => { shotBlob = b; }, 'image/jpeg', 0.85);
     }
     if (G.state !== 'title' && G.state !== 'gameover') {
-      drawOverlay();
+      drawOverlay(dt);
       drawRadar();
       updateHUD(dt);
     } else octx.clearRect(0, 0, innerWidth, innerHeight);

@@ -97,3 +97,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: #000; colo
   .res-table th, .res-table td { padding: 3px 6px; }
   #gameover .card { padding: 14px 16px 12px; }
 }
+
+/* 敵空母ゲージ：被弾時に白く光って揺れる */
+#ecWrap.hit .bar { border-color: #fff; box-shadow: 0 0 12px rgba(255,255,255,.9); }
+#ecWrap.hit #ecBar { background: linear-gradient(90deg, #ffffff, #ffe0a0); }
