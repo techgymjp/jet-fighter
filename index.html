@@ -16,11 +16,11 @@
 <div id="hud" class="hidden">
   <div id="topLeft">
     <div>SCORE <span id="score">0</span></div>
-    <div>STAGE <span id="stage">1</span>　撃墜 <span id="kills">0</span></div>
+    <div>STAGE <span id="stage">1</span>　<span data-i18n="hud.kills">撃墜</span> <span id="kills">0</span></div>
     <div>LIVES <span id="lives"></span></div>
   </div>
   <div id="ecWrap">
-    <label>敵空母 <span id="ecPct">100%</span></label>
+    <label><span data-i18n="hud.ec">敵空母</span> <span id="ecPct">100%</span></label>
     <div class="bar"><div id="ecBar"></div></div>
   </div>
   <canvas id="radar" width="360" height="360"></canvas>
@@ -45,27 +45,28 @@
 
 <div id="title" class="screen">
   <h1>JET STRIKE</h1>
-  <h2>〜 音速の翼 〜</h2>
-  <p class="lead">空母からカタパルトで射出！ 敵機を撃墜し、敵空母を撃沈せよ。<br>燃料が尽きる前に母艦へ帰還し、給油して再出撃だ。</p>
-  <button id="startBtn">出撃する</button>
-  <p class="tc touchHelp">左のスティックで操縦（上下で機首・左右で旋回）<br>右のボタン：機銃 / MSL（ミサイル）/ AB（加速）/ 減速 / 発艦・着艦 / 視点</p>
+  <h2 data-i18n="title.sub">〜 音速の翼 〜</h2>
+  <p class="lead" data-i18n-html="title.lead">空母からカタパルトで射出！ 敵機を撃墜し、敵空母を撃沈せよ。<br>燃料が尽きる前に母艦へ帰還し、給油して再出撃だ。</p>
+  <button id="startBtn" data-i18n="title.start">出撃する</button>
+  <p class="langSel"><button class="langBtn" data-lang="ja">日本語</button><button class="langBtn" data-lang="en">English</button></p>
+  <p class="tc touchHelp" data-i18n-html="title.touchHelp">左のスティックで操縦（上下で機首・左右で旋回）<br>右のボタン：機銃 / MSL（ミサイル）/ AB（加速）/ 減速 / 発艦・着艦 / 視点</p>
   <table class="controls">
-    <tr><th>W / S (↑ / ↓)</th><td>機首 上げ / 下げ</td></tr>
-    <tr><th>A / D (← / →)</th><td>ロール（旋回）</td></tr>
-    <tr><th>Q / E</th><td>ラダー（左右）</td></tr>
-    <tr><th>SHIFT</th><td>アフターバーナー（燃料を多く消費）</td></tr>
-    <tr><th>X</th><td>減速</td></tr>
-    <tr><th>SPACE / J</th><td>機銃</td></tr>
-    <tr><th>F / K</th><td>ミサイル（ロックオン時は誘導）</td></tr>
-    <tr><th>L</th><td>着艦（母艦の近く・低空で）</td></tr>
-    <tr><th>SPACE / ENTER</th><td>発艦（甲板上で）</td></tr>
-    <tr><th>C / V / P</th><td>視点切替 / 上下反転 / ポーズ</td></tr>
+    <tr><th>W / S (↑ / ↓)</th><td data-i18n="ctl.pitch">機首 上げ / 下げ</td></tr>
+    <tr><th>A / D (← / →)</th><td data-i18n="ctl.roll">ロール（旋回）</td></tr>
+    <tr><th>Q / E</th><td data-i18n="ctl.rudder">ラダー（左右）</td></tr>
+    <tr><th>SHIFT</th><td data-i18n="ctl.ab">アフターバーナー（燃料を多く消費）</td></tr>
+    <tr><th>X</th><td data-i18n="ctl.brake">減速</td></tr>
+    <tr><th>SPACE / J</th><td data-i18n="ctl.gun">機銃</td></tr>
+    <tr><th>F / K</th><td data-i18n="ctl.msl">ミサイル（ロックオン時は誘導）</td></tr>
+    <tr><th>L</th><td data-i18n="ctl.land">着艦（母艦の近く・低空で）</td></tr>
+    <tr><th>SPACE / ENTER</th><td data-i18n="ctl.launch">発艦（甲板上で）</td></tr>
+    <tr><th>C / V / P</th><td data-i18n="ctl.misc">視点切替 / 上下反転 / ポーズ</td></tr>
   </table>
   <p class="best">HIGH SCORE <span id="best">0</span></p>
   <p class="legal">
     <span id="buildInfo"></span>
-    <a href="https://techgym.jp/privacy-policy/" target="_blank" rel="noopener">プライバシーポリシー</a>
-    <span id="adPrivacy" class="hidden">｜<a href="#" id="adPrivacyLink">広告の設定</a></span>
+    <a href="https://techgym.jp/privacy-policy/" data-i18n-href="url.privacy" target="_blank" rel="noopener" data-i18n="legal.privacy">プライバシーポリシー</a>
+    <span id="adPrivacy" class="hidden">｜<a href="#" id="adPrivacyLink" data-i18n="legal.adSettings">広告の設定</a></span>
   </p>
 </div>
 
@@ -73,13 +74,13 @@
   <div class="card">
     <div class="res-head">GAME OVER</div>
     <div class="res-score"><span id="goScore">0</span><small>pts</small></div>
-    <div id="goNew" class="res-new hidden">🎉 自己ベスト更新！</div>
+    <div id="goNew" class="res-new hidden" data-i18n="go.new">🎉 自己ベスト更新！</div>
     <div id="goRank" class="res-title"></div>
     <table id="goTable" class="res-table"></table>
     <p id="goTip" class="tip"></p>
     <div class="btns">
-      <button id="retryBtn" class="btn">もう一度</button>
-      <button id="btnShare" class="btn ghost">シェア</button>
+      <button id="retryBtn" class="btn" data-i18n="go.retry">もう一度</button>
+      <button id="btnShare" class="btn ghost" data-i18n="go.share">シェア</button>
     </div>
   </div>
 </div>
@@ -87,32 +88,33 @@
 <div id="continue" class="screen hidden">
   <div class="card">
     <div class="res-head">CONTINUE?</div>
-    <p class="cont-lead">広告を見ると、残機 +1 で母艦から再出撃できます<br><small>（1 ゲームにつき 1 回まで）</small></p>
+    <p class="cont-lead" data-i18n-html="cont.lead">広告を見ると、残機 +1 で母艦から再出撃できます<br><small>（1 ゲームにつき 1 回まで）</small></p>
     <div class="cont-count"><span id="contCount">10</span></div>
     <p id="contNote" class="cont-note"></p>
     <div class="btns">
       <button id="contWatch" class="btn">▶ 広告を見て続行</button>
-      <button id="contGiveUp" class="btn ghost">あきらめる</button>
+      <button id="contGiveUp" class="btn ghost" data-i18n="cont.giveUp">あきらめる</button>
     </div>
   </div>
 </div>
 
-<div id="pause" class="screen hidden"><h1>PAUSE</h1><p class="lead"><span class="kb">P キーで再開</span><span class="tc">画面をタップで再開</span></p></div>
+<div id="pause" class="screen hidden"><h1>PAUSE</h1><p class="lead"><span class="kb" data-i18n="pause.kb">P キーで再開</span><span class="tc" data-i18n="pause.tc">画面をタップで再開</span></p></div>
 
 <div id="touch" class="hidden">
   <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
   <div id="btns">
-    <button id="tFire">機銃</button>
+    <button id="tFire" data-i18n="tb.gun">機銃</button>
     <button id="tMsl">MSL</button>
     <button id="tAB">AB</button>
-    <button id="tBrake">減速</button>
-    <button id="tAct">発艦/着艦</button>
-    <button id="tCam">視点</button>
+    <button id="tBrake" data-i18n="tb.brake">減速</button>
+    <button id="tAct" data-i18n-html="tb.act">発艦/着艦</button>
+    <button id="tCam" data-i18n="tb.cam">視点</button>
   </div>
 </div>
 
 <script src="js/vendor/three.min.js"></script>
 <script src="js/audio.js"></script>
+<script src="js/i18n.js"></script>
 <script src="js/build-info.js"></script>
 <script src="js/ads-config.js"></script>
 <script src="js/ads.js"></script>

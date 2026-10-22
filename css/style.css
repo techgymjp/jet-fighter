@@ -148,3 +148,23 @@ body.touch .kb, body.touch .controls { display: none; }
 .cont-note { min-height: 1.2em; font-size: 14px; color: #ffb36b; margin-bottom: 6px; }
 #continue .btn:disabled { opacity: .7; }
 #buildInfo { margin-right: 10px; opacity: .8; }
+
+/* タイトル画面の言語切り替え */
+.langSel { margin-top: 12px; display: flex; gap: 8px; justify-content: center; }
+.screen .langBtn { font-size: 14px; padding: 6px 16px; border-radius: 16px; letter-spacing: 1px; box-shadow: none;
+  background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.4); color: #d8e4f0; font-weight: normal; }
+.screen .langBtn.on { background: rgba(255,138,31,.85); border-color: #ff8a1f; color: #fff; font-weight: bold; }
+@media (max-height: 500px) { .langSel { margin-top: 6px; } .screen .langBtn { font-size: 12px; padding: 4px 12px; } }
+/* 横向きスマホでは結果カードを詰めて、ボタンまで画面内に収める */
+.screen { justify-content: safe center; }
+@media (max-height: 500px) {
+  .res-head { font-size: 14px; letter-spacing: 6px; }
+  .res-score { font-size: 38px; }
+  .res-score small { font-size: 14px; }
+  .res-new { font-size: 13px; margin: 0; }
+  .res-title { font-size: 16px; margin: 2px 0 6px; }
+  .res-table { font-size: 12px; margin-bottom: 4px; }
+  .res-table th, .res-table td { padding: 1px 6px; }
+  .tip { font-size: 12px; line-height: 1.4; margin: 4px 0 8px; }
+  #gameover .btn { font-size: 16px; padding: 8px 12px; }
+}

@@ -10,6 +10,8 @@
   const _v1 = new V3(), _v2 = new V3(), _v3 = new V3(), _v4 = new V3(), _v5 = new V3();
   const _q1 = new Q(), _q2 = new Q();
   const $ = id => document.getElementById(id);
+  const t = I18N.t;
+  I18N.apply();
 
   // ---------------------------------------------------------------- 描画基盤
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -118,7 +120,7 @@
     if (code === 'KeyP' || code === 'Escape') { togglePause(); return; }
     if (G.paused) return;
     if (code === 'KeyC') G.camMode = G.camMode === 'chase' ? 'cockpit' : 'chase';
-    if (code === 'KeyV') { G.invert = !G.invert; showMsg('', G.invert ? '上下操作：反転（↑で機首下げ）' : '上下操作：通常（↑で機首上げ）', 1.5); }
+    if (code === 'KeyV') { G.invert = !G.invert; showMsg('', t(G.invert ? 'msg.invertOn' : 'msg.invertOff'), 1.5); }
     if (code === 'KeyF' || code === 'KeyK') fireMissile();
     if (code === 'KeyL') tryLanding();
     if ((code === 'Space' || code === 'Enter') && G.state === 'deck') tryLaunch();
@@ -146,9 +148,10 @@
   // タッチ操作
   const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   // 案内文に出す操作名（タッチ端末ではボタン名で案内する）
-  const KEY = isTouch
-    ? { launch: '「発艦/着艦」ボタン', land: '「発艦/着艦」ボタン', msl: '「MSL」ボタン', gun: '「機銃」ボタン', ab: '「AB」ボタンの加速' }
-    : { launch: 'SPACE / ENTER', land: 'L キー', msl: 'F キー', gun: 'SPACE キー', ab: 'SHIFT のアフターバーナー' };
+  const KEY = {};
+  for (const k of ['launch', 'land', 'msl', 'gun', 'ab']) {
+    Object.defineProperty(KEY, k, { get: () => t((isTouch ? 'btn.' : 'key.') + k) });
+  }
   (function setupTouch() {
     const zone = $('stickZone'), base = $('stickBase'), knob = $('stickKnob');
     let id = null, cx = 0, cy = 0;
@@ -195,6 +198,9 @@
   if (isTouch) document.body.classList.add('touch');
   $('pause').addEventListener('pointerdown', () => setPaused(false));
 
+  // タイトル画面の言語切り替え
+  document.querySelectorAll('[data-lang]').forEach(b => b.addEventListener('click', () => I18N.setLang(b.dataset.lang)));
+
   // どのビルドが入っているか分かるよう、アプリ版はタイトル画面にバージョンを出す
   if (window.APP_VERSION && window.APP_VERSION !== 'dev') $('buildInfo').textContent = window.APP_VERSION;
 
@@ -224,7 +230,7 @@
   function showContinue() {
     G.state = 'continue'; G.contT = 10; contBusy = false;
     $('contWatch').disabled = false;
-    $('contWatch').textContent = '▶ 広告を見て続行';
+    $('contWatch').textContent = t('cont.watch');
     $('contNote').textContent = '';
     $('continue').classList.remove('hidden');
     $('touch').classList.add('hidden');
@@ -236,11 +242,11 @@
     if (G.state !== 'continue' || contBusy) return;
     contBusy = true;
     $('contWatch').disabled = true;
-    $('contWatch').textContent = '広告を読み込み中…';
+    $('contWatch').textContent = t('cont.loading');
     const result = await Ads.showRewarded();
     if (G.state !== 'continue') return;
     if (result === 'unavailable') {
-      $('contNote').textContent = '広告を読み込めませんでした（通信状態を確認してください）';
+      $('contNote').textContent = t('cont.fail');
       setTimeout(giveUp, 2200);
       return;
     }
@@ -252,7 +258,7 @@
     enterDeck(false);
     setPaused(false);
     $('touch').classList.toggle('hidden', !isTouch);
-    showMsg('CONTINUE!', `残機 +1　${KEY.launch}で再出撃`, 3);
+    showMsg('CONTINUE!', t('msg.continueSub', { launch: KEY.launch }), 3);
   });
 
   function togglePause() {
@@ -303,7 +309,7 @@
     spawnStage();
     resupply();
     enterDeck(false);
-    showMsg('MISSION START', `STAGE ${G.stage}　敵空母を撃沈せよ！`, 3);
+    showMsg('MISSION START', t('msg.startSub', { s: G.stage }), 3);
   }
 
   function spawnStage() {
@@ -348,7 +354,7 @@
     G.guide.found = false; G.guide.mslOut = false;
     G.camBlend = 0.05;
     Sfx.spool();
-    showMsg('', 'カタパルト射出準備…', 1.2);
+    showMsg('', t('msg.catapult'), 1.2);
   }
 
   function nextStage() {
@@ -356,7 +362,7 @@
     G.stage++;
     G.guide.found = false; G.guide.mslOut = false;
     spawnStage();
-    showMsg(`STAGE ${G.stage}`, '新たな敵空母艦隊を発見！ レーダーを確認せよ', 3.5);
+    showMsg(`STAGE ${G.stage}`, t('msg.newStageSub'), 3.5);
     Sfx.beep(660, 0.15); Sfx.beep(990, 0.25);
   }
 
@@ -367,17 +373,17 @@
     $('best').textContent = G.best;
     $('goScore').textContent = G.score.toLocaleString();
     $('goNew').classList.toggle('hidden', !isNew);
-    $('goRank').textContent = `称号「${rankOf(G.score)}」`;
+    $('goRank').textContent = t('go.rank', { r: rankOf(G.score) });
     const S = G.stats;
     const mm = Math.floor(S.flightTime / 60), ss = Math.floor(S.flightTime % 60);
     $('goTable').innerHTML = [
-      ['撃墜数', `${G.kills} 機`],
-      ['敵空母撃沈', `${S.sunk} 隻`],
-      ['到達ステージ', `STAGE ${G.stage}`],
-      ['最高速度', `${Math.round(S.maxSpeed * 3.6).toLocaleString()} km/h（マッハ ${(S.maxSpeed / MACH1).toFixed(2)}）`],
-      ['着艦成功', `${S.landings} 回`],
-      ['飛行時間', `${mm}分${String(ss).padStart(2, '0')}秒`],
-      ['ハイスコア', `${G.best.toLocaleString()} pts`],
+      [t('st.kills'), t('st.killsV', { n: G.kills })],
+      [t('st.sunk'), t('st.sunkV', { n: S.sunk })],
+      [t('st.stage'), `STAGE ${G.stage}`],
+      [t('st.speed'), t('st.speedV', { kmh: Math.round(S.maxSpeed * 3.6).toLocaleString(), m: (S.maxSpeed / MACH1).toFixed(2) })],
+      [t('st.landings'), t('st.landingsV', { n: S.landings })],
+      [t('st.time'), t('st.timeV', { m: mm, s: String(ss).padStart(2, '0') })],
+      [t('st.best'), `${G.best.toLocaleString()} pts`],
     ].map(([k, v]) => `<tr><th>${k}</th><td>${v}</td></tr>`).join('');
     $('goTip').textContent = `💡 ${tipFor(S)}`;
     shotBlob = null;
@@ -392,29 +398,25 @@
   // シェア時はゲームを紹介している記事ページへ誘導する
   const SHARE_URL = 'https://techgym.jp/column/claude-code-game-jet-fighter/';
   function rankOf(score) {
-    if (score >= 15000) return '伝説の撃墜王';
-    if (score >= 8000) return 'トップガン';
-    if (score >= 4000) return 'エースパイロット';
-    if (score >= 1500) return '一人前のパイロット';
-    if (score >= 500) return '新米パイロット';
-    return 'ひよっこ訓練生';
+    const steps = [500, 1500, 4000, 8000, 15000];
+    return t('rank.' + steps.filter(v => score >= v).length);
   }
   function tipFor(S) {
-    if (S.landings === 0 && S.fuelOuts > 0) return `燃料が 35% を切ったら HOME マーカーへ。母艦の近くで ${KEY.land}を押せば自動で着艦できるぞ。`;
-    if (S.sunk === 0 && G.kills >= 3) return `敵空母にはミサイルが効く。赤い「LOCK」が出てから ${KEY.msl}で撃てば 1 発で大ダメージ！`;
-    if (G.kills < 3) return `${KEY.ab}で一気に距離を詰め、敵機を照準の円に重ねて ${KEY.gun}で撃て。`;
-    if (S.maxSpeed < MACH1) return 'アフターバーナーを踏み続けてマッハ 1 を突破すると、衝撃雲が出るぞ。';
-    return '着艦すれば燃料・弾薬・装甲がすべて回復。こまめに補給して次の敵空母へ！';
+    if (S.landings === 0 && S.fuelOuts > 0) return t('tip.land', { land: KEY.land });
+    if (S.sunk === 0 && G.kills >= 3) return t('tip.msl', { msl: KEY.msl });
+    if (G.kills < 3) return t('tip.gun', { ab: KEY.ab, gun: KEY.gun });
+    if (S.maxSpeed < MACH1) return t('tip.mach');
+    return t('tip.resupply');
   }
   (function setupShare() {
     $('btnShare').addEventListener('click', async () => {
-      const text = `JET STRIKE 〜音速の翼〜 で ${G.score.toLocaleString()}点！ 撃墜${G.kills}機・敵空母${G.stats.sunk}隻撃沈 称号「${rankOf(G.score)}」 #JETSTRIKE`;
+      const text = t('share.text', { score: G.score.toLocaleString(), kills: G.kills, sunk: G.stats.sunk, rank: rankOf(G.score) });
       const url = SHARE_URL;
       const nativeShare = plugin('Share');
       if (nativeShare) {
-        try { await nativeShare.share({ title: 'JET STRIKE 〜音速の翼〜', text, url, dialogTitle: '結果をシェア' }); } catch (e) { /* キャンセル */ }
+        try { await nativeShare.share({ title: t('share.title'), text, url, dialogTitle: t('share.dialog') }); } catch (e) { /* キャンセル */ }
       } else if (navigator.share) {
-        const data = { title: 'JET STRIKE 〜音速の翼〜', text };
+        const data = { title: t('share.title'), text };
         data.url = url;
         if (shotBlob) {
           const file = new File([shotBlob], 'jetstrike.jpg', { type: 'image/jpeg' });
@@ -478,13 +480,13 @@
     const burn = !engineOn ? 0 : p.abOn ? 2.7 : inp.brake ? 0.55 : 0.8;
     const before = p.fuel;
     p.fuel = Math.max(0, p.fuel - burn * dt);
-    if (before > 0 && p.fuel <= 0) { G.stats.fuelOuts++; showMsg('FLAME OUT', '燃料切れ！ エンジン停止… 滑空して母艦へ！', 3); Sfx.beep(300, 0.4, 0.2); }
+    if (before > 0 && p.fuel <= 0) { G.stats.fuelOuts++; showMsg('FLAME OUT', t('msg.flameoutSub'), 3); Sfx.beep(300, 0.4, 0.2); }
 
     // マッハ突破
     if (p.prevSpeed < MACH1 && p.speed >= MACH1) {
       FX.vaporCone(_v1.copy(p.pos).addScaledVector(p.fwd, 2), p.fwd, p.up, p.right, p.vel);
       Sfx.sonic(); G.shake = Math.max(G.shake, 0.9);
-      showMsg(null, 'MACH 1 突破！', 1.2);
+      showMsg(null, t('msg.mach'), 1.2);
     }
     p.prevSpeed = p.speed;
     G.stats.maxSpeed = Math.max(G.stats.maxSpeed, p.speed);
@@ -537,7 +539,7 @@
     p.mesh.visible = false;
     G.state = 'dead'; G.st = 0;
     G.lives--;
-    showMsg(reason === 'shot' ? '撃墜された！' : '墜落！', G.lives > 0 ? `残機 ${G.lives}` : '', 3);
+    showMsg(t(reason === 'shot' ? 'msg.shotDown' : 'msg.crashed'), G.lives > 0 ? t('msg.livesLeft', { n: G.lives }) : '', 3);
   }
 
   function damagePlayer(d, at) {
@@ -559,7 +561,7 @@
 
   function tryLanding() {
     if (!inLandingZone()) {
-      if (G.state === 'flight') showMsg(null, '着艦するには母艦の近く（3km以内・高度900m以下）へ', 1.6);
+      if (G.state === 'flight') showMsg(null, t('msg.landTooFar'), 1.6);
       return;
     }
     const lp = toLocal(home, player.pos, new V3());
@@ -579,7 +581,7 @@
         speedLines.seeded = false;
       };
     }
-    showMsg('', '着艦アプローチ開始 — フックダウン', 2.5);
+    showMsg('', t('msg.approach'), 2.5);
   }
 
   function beginLandingPath(lp, lf, speed) {
@@ -608,7 +610,7 @@
         toWorld(home, _v1.set(0, DECK_Y + GEAR_H, TOUCH_Z), p.pos);
         p.quat.copy(home.quat);
         Sfx.thud(); G.shake = 1.4;
-        showMsg('TRAP!', 'アレスティングワイヤー捕捉！', 1.5);
+        showMsg('TRAP!', t('msg.trapSub'), 1.5);
         for (let i = 0; i < 20; i++) FX.steam(p.pos, 1);
         return;
       }
@@ -636,7 +638,7 @@
       }
       if (L.rollSpeed <= 0) {
         enterDeck(true);
-        showMsg('着艦成功！', '給油・補給中…', 2);
+        showMsg(t('msg.landed'), t('msg.landedSub'), 2);
         G.score += 50;
         G.stats.landings++;
       }
@@ -675,7 +677,7 @@
         p.forcedAB = 2.5;
         p.mesh.parts.gear.visible = false;
         G.camBlend = 0.06;
-        showMsg('TAKE OFF!!', '敵空母へ向かえ！', 2);
+        showMsg('TAKE OFF!!', t('msg.takeoffSub'), 2);
       }
     }
   }
@@ -694,7 +696,7 @@
         G.ready = true;
         // 給油が終わったら発艦位置へ
         placeOnDeck(CAT_Z);
-        showMsg('給油完了！', `${KEY.launch}で発艦`, 3);
+        showMsg(t('msg.refueled'), t('msg.launchSub', { launch: KEY.launch }), 3);
         Sfx.beep(880, 0.12); Sfx.beep(1320, 0.18);
       }
     }
@@ -780,7 +782,7 @@
     scene.add(m.mesh);
     missiles.push(m);
     Sfx.missile();
-    showMsg(null, m.target ? 'FOX 2 — ミサイル発射！' : 'ミサイル発射（無誘導）', 1);
+    showMsg(null, t(m.target ? 'msg.fox2' : 'msg.dumbfire'), 1);
   }
 
   function updateMissiles(dt) {
@@ -831,12 +833,12 @@
     const d = c.pos.distanceTo(player.pos);
     if (!G.guide.found && d < 5000) {
       G.guide.found = true;
-      showMsg('敵空母を発見！', `照準に入れてロックオン → 赤い LOCK が出たら ${KEY.msl}でミサイル発射！`, 4.5);
+      showMsg(t('msg.found'), t('msg.foundSub', { msl: KEY.msl }), 4.5);
       Sfx.beep(880, 0.1); Sfx.beep(1320, 0.15);
     }
     if (G.guide.found && !G.guide.mslOut && player.msl === 0 && missiles.length === 0 && d < 8000) {
       G.guide.mslOut = true;
-      showMsg('ミサイル切れ！', `${KEY.gun}の機銃で甲板を狙え ／ 母艦で補給して再攻撃もアリ`, 4.5);
+      showMsg(t('msg.mslOut'), t('msg.mslOutSub', { gun: KEY.gun }), 4.5);
     }
   }
 
@@ -895,7 +897,7 @@
     if (e.pos.y > 5) {
       G.kills++;
       G.score += byMissile ? 150 : 100;
-      showMsg('撃墜！', `+${byMissile ? 150 : 100}`, 1.2);
+      showMsg(t('msg.kill'), `+${byMissile ? 150 : 100}`, 1.2);
     }
   }
 
@@ -1012,7 +1014,7 @@
       c.hp = 0; c.alive = false; c.dying = 0; c.boomT = 0;
       G.score += 2000;
       G.stats.sunk++;
-      showMsg('敵空母 撃沈！！', '+2000　大爆発に巻き込まれるな！', 3);
+      showMsg(t('msg.sunk'), t('msg.sunkSub'), 3);
     }
   }
 
@@ -1085,7 +1087,7 @@
         Sfx.boom(7, Math.max(0.5, vol(_v1, 12000)));
         shakeAt(_v1, 3, 6000);
         G.stageClearT = 9;
-        setTimeout(() => showMsg('STAGE CLEAR!', '燃料を確認し、母艦へ帰還せよ', 4), 1500);
+        setTimeout(() => showMsg('STAGE CLEAR!', t('msg.clearSub'), 4), 1500);
       }
     }
   }
@@ -1448,12 +1450,12 @@
     if (G.state === 'flight') {
       const homeD = Math.hypot(p.pos.x - home.pos.x, p.pos.z - home.pos.z);
       const need = homeD / 250 * 0.8 + 6; // 巡航で帰るのに必要な燃料の目安
-      if (p.fuel <= 0) warn = `FLAME OUT — ${KEY.land}で着艦できる距離まで滑空せよ`;
-      else if (p.fuel < 15 || p.fuel < need) warn = 'BINGO FUEL!! 今すぐ母艦へ帰還せよ';
-      else if (p.fuel < 35) warn = 'FUEL LOW — 母艦へ帰還せよ';
+      if (p.fuel <= 0) warn = t('warn.flameout', { land: KEY.land });
+      else if (p.fuel < 15 || p.fuel < need) warn = t('warn.bingo');
+      else if (p.fuel < 35) warn = t('warn.low');
       if (p.hp < 30) warn = (warn ? warn + '<br>' : '') + 'DAMAGE CRITICAL';
       if (p.pos.y < 150 && p.fwd.y < -0.25) warn = 'PULL UP!! PULL UP!!';
-      if (Math.hypot(p.pos.x, p.pos.z) > 22000) warn = (warn ? warn + '<br>' : '') + '作戦空域外 — 引き返せ';
+      if (Math.hypot(p.pos.x, p.pos.z) > 22000) warn = (warn ? warn + '<br>' : '') + t('warn.oob');
       if (warn) {
         G.warnT -= dt;
         if (G.warnT <= 0) { G.warnT = p.fuel < 15 || warn.startsWith('PULL') ? 0.5 : 1.2; Sfx.beep(warn.startsWith('PULL') ? 1100 : 740, 0.12, 0.08); }
@@ -1462,17 +1464,17 @@
     setHtml(h.warning, warn ? `<span class="blink">${warn}</span>` : '');
 
     let hint = '';
-    if (G.state === 'deck') hint = G.ready ? `<span class="blink">${KEY.launch}で発艦！</span>` : `給油・補給中… ${Math.floor(p.fuel)}%`;
-    else if (G.state === 'flight' && inLandingZone()) hint = `<span class="blink" style="color:#50ff8a">${KEY.land}で着艦アプローチ</span>`;
-    else if (G.state === 'flight' && p.fuel < 35) hint = '<span style="color:#ffc23b">緑の HOME マーカーの方向へ飛べ</span>';
+    if (G.state === 'deck') hint = G.ready ? `<span class="blink">${t('hint.launch', { launch: KEY.launch })}</span>` : t('hint.refueling', { p: Math.floor(p.fuel) });
+    else if (G.state === 'flight' && inLandingZone()) hint = `<span class="blink" style="color:#50ff8a">${t('hint.land', { land: KEY.land })}</span>`;
+    else if (G.state === 'flight' && p.fuel < 35) hint = `<span style="color:#ffc23b">${t('hint.home')}</span>`;
     else if (G.state === 'flight' && enemyCarrier && enemyCarrier.alive && enemyCarrier.pos.distanceTo(p.pos) < 6000) {
       const lockC = p.lockTarget === enemyCarrier;
-      if (p.msl > 0 && lockC && p.locked) hint = `<span class="blink" style="color:#ff6050">LOCK!　${KEY.msl}でミサイル発射！</span>`;
-      else if (p.msl > 0 && lockC) hint = '<span style="color:#ffd040">そのまま空母を照準に入れ続けろ… ロックオン中</span>';
-      else if (p.msl > 0 && p.lockTarget) hint = '<span style="color:#ffd040">敵機をロック中 — 空母を狙うなら照準を空母へ合わせ直せ</span>';
-      else if (p.msl > 0) hint = '<span style="color:#ffd040">赤い TARGET（敵空母）を照準の円に入れてロックオン</span>';
-      else if (p.ammo > 0) hint = `<span style="color:#ffd040">${KEY.gun}で甲板を機銃掃射 — 急降下しすぎて海に突っ込むな</span>`;
-      else hint = `<span style="color:#ffc23b">弾切れ — 母艦へ戻って補給しよう（近くで${KEY.land}で着艦）</span>`;
+      if (p.msl > 0 && lockC && p.locked) hint = `<span class="blink" style="color:#ff6050">${t('hint.lockFire', { msl: KEY.msl })}</span>`;
+      else if (p.msl > 0 && lockC) hint = `<span style="color:#ffd040">${t('hint.locking')}</span>`;
+      else if (p.msl > 0 && p.lockTarget) hint = `<span style="color:#ffd040">${t('hint.wrongLock')}</span>`;
+      else if (p.msl > 0) hint = `<span style="color:#ffd040">${t('hint.aim')}</span>`;
+      else if (p.ammo > 0) hint = `<span style="color:#ffd040">${t('hint.strafe', { gun: KEY.gun })}</span>`;
+      else hint = `<span style="color:#ffc23b">${t('hint.noAmmo', { land: KEY.land })}</span>`;
     }
     setHtml(h.hint, hint);
 
@@ -1507,7 +1509,7 @@
           if (G.lives > 0) {
             resupply();
             enterDeck(false);
-            showMsg('再出撃準備完了', `${KEY.launch}で発艦`, 2.5);
+            showMsg(t('msg.ready'), t('msg.launchSub', { launch: KEY.launch }), 2.5);
           } else if (canContinue()) showContinue();
           else gameOver();
         }
