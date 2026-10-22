@@ -103,10 +103,11 @@ npm run android:open   # Android Studio で開く
 
 ### Google Play へ公開する手順
 
-1. アップロード鍵を作成し、安全な場所に保管する（なくすと更新版を出せなくなります）
+1. アップロード鍵を作成し、安全な場所に保管する（Java が必要。Mac は https://adoptium.net/ の Temurin を入れる。なくした場合は Play Console からリセットを申請できるが時間がかかる）
    ```bash
    keytool -genkeypair -v -keystore upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000
-   base64 -w0 upload.jks > upload.jks.base64   # macOS は base64 -i upload.jks
+   base64 -w0 upload.jks > upload.jks.base64          # Linux
+   base64 -i upload.jks | tr -d '\n' | pbcopy          # macOS（クリップボードにコピー）
    ```
 2. GitHub のリポジトリの Settings → Secrets and variables → Actions に次の 4 つを登録する
    | 名前 | 内容 |
