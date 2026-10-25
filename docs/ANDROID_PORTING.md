@@ -11,6 +11,15 @@ JET STRIKE（このリポジトリ）で、Web ゲームを Android アプリに
 
 参考実装はこのリポジトリです。迷ったら同じファイルを見てまねしてください。
 
+**Claude Code へ: 頼まれたら、最初の返事ですぐに次の 2 つを伝える**（ユーザーが AdMob・Play Console の登録を始めるのに、いち早く必要なため。作業を進めながら後で伝えるのでは遅い）
+
+| 項目 | 伝えること |
+| --- | --- |
+| パッケージ名 | `jp.techgym.〇〇`。指定に `-` などの使えない文字があれば、直した名前（下の 3 章の 1）をはっきり伝える |
+| アプリ名 | ストアのアプリ名の案（日本語・英語、それぞれ 30 字以内）と、ホーム画面に出る短い名前（日本語・英語） |
+
+案を変えたいと言われたら、すぐに差し替える（`android/app/src/main/res/values/strings.xml`、`values-en/strings.xml`、`capacitor.config.json` の `appName`、ストアの掲載文）。
+
 ---
 
 ## 1. もう済んでいること（ゲームごとにやり直さなくてよい）
@@ -65,9 +74,23 @@ JET STRIKE（このリポジトリ）で、Web ゲームを Android アプリに
 
 | 種類 | 出す場面 |
 | --- | --- |
-| バナー | トップ（タイトル）画面・ポーズ画面・結果画面だけ。プレイ中は操作ボタンと重なるので出さない |
-| 全画面広告（インタースティシャル） | 「次の面に行く」「トップに戻る」「ポーズ画面からの再開」のたびに、毎回出す |
-| リワード広告 | ゲームに何らかの「チート」（失敗したところのやり直し、残機 +1 など）を用意し、それを使うときに見てもらう |
+| バナー | **トップ（タイトル）画面・ポーズ画面・結果画面の 3 つだけ**（画面の下中央）。プレイ中は操作ボタンと重なるので出さない |
+| 全画面広告（インタースティシャル） | **「トップ画面に戻る」「ポーズ画面からの再開」「結果画面からもう一度プレイする（次の面に行く）」のたびに、毎回出す**（2 回に 1 回などに間引かない） |
+| リワード広告 | ゲーム性に合った「チート」を 1 つ用意し、それを使うときにだけ見てもらう（下の「リワードの決め方」） |
+
+**リワードの決め方**
+
+- そのゲームで「一番悔しい失敗」を取り返せるものにする。点数や順位を直接もらえるものにはしない
+- 見るかどうかは遊ぶ人が選ぶ。失敗の様子（ボールの行方・相手が走り去るところなど）を見届けられるよう、案内は 2〜4 秒待ってから出し、数秒で自動的に消して先へ進める
+- 1 ゲームで使える回数に上限をつける（5 回など）。使ったことは結果画面とシェア文に「やり直し N 回」のように出す
+- やり直すときは、そのプレーの成績を取り消し、同じ配置・同じ乱数で再現する（1 プレーごとに乱数の種をゲームの種から作っておく）
+- 広告を最後まで見たとき（`onRewardedVideoAdReward`）だけ効く。途中で閉じたり読み込めなかったりしたら、何もせず先へ進める
+
+| ゲーム | リワード（チート） |
+| --- | --- |
+| techgymjp/jet-fighter（JET STRIKE） | 最後の残機を失ったときの「CONTINUE?」で残機 +1（1 ゲーム 1 回） |
+| techgymjp/jackal（ジャッカル） | 失敗したプレーをやり直す（1 ゲーム 5 回） |
+| techgymjp/corner-kick（コーナーキック） | 外したコーナーキックをもう一度蹴り直す（1 ゲーム 5 回。10 本で何点取れるかを競うので、1 本を取り返すのが一番自然） |
 
 - 面（ステージ）がないゲームでは、結果画面の「もう一度」（次のゲームへ）を「次の面に行く」として扱う（例: techgymjp/jackal）
 - 広告ユニット ID は種類ごとに届くことがある。ID が空の種類は本番ビルドで出さないようにしておくと、そろうまでも先にビルドできる（jackal の `ads.js`）
@@ -89,6 +112,11 @@ JET STRIKE（このリポジトリ）で、Web ゲームを Android アプリに
 3. Secrets があれば、`ADMOB_MODE=production npm run build` → `npx cap copy android` → `./gradlew bundleRelease` で署名付き AAB を作り、Artifact に上げる
 - `concurrency` で古いビルドを取り消す。`timeout-minutes` を付けて固まったまま待たされないようにする
 - 動作確認用 APK の URL は `https://github.com/techgymjp/<リポジトリ>/releases/latest/download/<名前>.apk`。QR コードにしておくとスマホで入れやすい
+- **リリース画面の QR コードを作って、リポジトリと README に入れ、ユーザーにも渡す**
+  - QR にするのはリリース画面 `https://github.com/techgymjp/<リポジトリ>/releases/tag/android-latest`（APK 直接より、説明とビルド番号が見えるので分かりやすい）
+  - 作り方：`npx --yes qrcode -w 600 -o docs/apk-qr.png "https://github.com/techgymjp/<リポジトリ>/releases/tag/android-latest"`
+  - README の「Android アプリ」に、リリース画面の URL・APK 直接の URL・`docs/apk-qr.png` を書く（例: techgymjp/jackal、techgymjp/corner-kick）
+  - Release は既定ブランチのビルドで初めてできる。QR を渡す前に、リリース画面に APK が載っているかを確かめる
 - **クラウドの Claude Code では dl.google.com に接続できず Android SDK を入れられないので、ビルドは GitHub Actions に任せる**
 
 ---
@@ -96,19 +124,33 @@ JET STRIKE（このリポジトリ）で、Web ゲームを Android アプリに
 ## 3. ゲームごとにやる手続き（ユーザーが画面で行う）
 
 1. **パッケージ名を決める**：`jp.techgym.〇〇`。Google Play に一度出すと変更できない
+   - 使える文字は英小文字・数字・`_` だけ（`-` は使えない）。リポジトリ名に `-` があるときは抜く（例: corner-kick → `jp.techgym.cornerkick`）
 2. **AdMob**
    - 「アプリを追加」→ Android →「ストアに掲載されていない」で登録
    - バナー・インタースティシャル・リワードの広告ユニットを作成（上の「広告の基本ルール」）
    - アプリ ID（`ca-app-pub-…~…`）と広告ユニット ID 3 つを Claude Code に渡す
    - 「プライバシーとメッセージ」→「欧州の規制」のメッセージに、新しいアプリを対象として追加
-3. **GitHub Secrets**（リポジトリの Settings → Secrets and variables → Actions）
+3. **GitHub Secrets**（Google Play 用の署名付き AAB を作るために、アップロード鍵を GitHub に預ける）
 
-   | 名前 | 内容 |
-   | --- | --- |
-   | `ANDROID_KEYSTORE_BASE64` | `base64 -i upload.jks \| tr -d '\n' \| pbcopy` でコピーした文字列 |
-   | `ANDROID_KEYSTORE_PASSWORD` | キーストアのパスワード |
-   | `ANDROID_KEY_ALIAS` | `upload` |
-   | `ANDROID_KEY_PASSWORD` | 鍵のパスワード |
+   1. GitHub でそのゲームのリポジトリを開き、上のタブの **Settings** →左の **Secrets and variables** → **Actions** を開く
+      （Settings が見えないときは、リポジトリの管理者の権限がない）
+   2. 「Repository secrets」の **New repository secret** を押し、Name と Secret を入れて **Add secret**。これを下の 4 つ分くり返す
+
+      | Name | Secret に入れるもの |
+      | --- | --- |
+      | `ANDROID_KEYSTORE_BASE64` | upload.jks を文字にしたもの（下の 3） |
+      | `ANDROID_KEYSTORE_PASSWORD` | キーストアのパスワード |
+      | `ANDROID_KEY_ALIAS` | `upload` |
+      | `ANDROID_KEY_PASSWORD` | 鍵のパスワード（キーストアのパスワードと同じにしていれば同じもの） |
+
+   3. upload.jks を文字にしてクリップボードにコピーする（upload.jks のあるフォルダで実行し、そのまま Secret 欄に貼る）
+      - Mac（ターミナル）：`base64 -i upload.jks | tr -d '\n' | pbcopy`
+      - Windows（PowerShell）：`[Convert]::ToBase64String([IO.File]::ReadAllBytes("upload.jks")) | Set-Clipboard`
+   4. 確かめる：Actions タブ →「Android build」→ **Run workflow**（または次の push）で動かし、終わった実行の下の Artifacts に
+      `〇〇-release-aab` が出ていれば成功。出ないときは 4 つの Name のつづりを確認する
+   - Secret は登録後に中身を見られない（上書きだけできる）。パスワードを間違えたら同じ Name で登録し直す
+   - **Secret の中身やパスワードはチャット（Claude Code を含む）に貼らない**。Claude Code には「登録した」とだけ伝えればよい
+   - リポジトリごとに登録が必要（ほかのリポジトリの Secrets は使えない）。鍵そのものは全ゲームで同じものを使ってよい
 
 4. **Play Console**
    - 「アプリを作成」：アプリ名、デフォルトの言語 日本語、ゲーム、無料
