@@ -1,11 +1,13 @@
-# Web ゲームを Android 化して Google Play に出すための引き継ぎメモ
+# Web ゲームをスマホアプリ化（Android / iOS）して公開するための引き継ぎメモ
 
-JET STRIKE（このリポジトリ）で、Web ゲームを Android アプリにし、AdMob 広告を入れて Google Play の審査に出すところまで進めました。
-ほかの Web ゲームを同じように Android 化するときに、別のセッション（Claude Code）へ渡すためのメモです。
+JET STRIKE（このリポジトリ）で、Web ゲームを Android アプリにして Google Play に公開し、iOS アプリにして App Store に申請するところまで進めました（AdMob 広告入り）。
+ほかの Web ゲームを同じようにアプリ化するときに、別のセッション（Claude Code）へ渡すためのメモです。1〜6 章が Android、**7 章が iOS** です。
 
 **別セッションへの頼み方の例**
 
 > techgymjp/jet-fighter の docs/ANDROID_PORTING.md を読んで、このゲームを同じ構成で Android 化してください。パッケージ名は jp.techgym.〇〇 です。
+
+> techgymjp/jet-fighter の docs/ANDROID_PORTING.md の 7 章を読んで、このゲームを同じ構成で iOS 化してください。Bundle ID は jp.techgym.〇〇 です。
 
 参考実装はこのリポジトリです。迷ったら同じファイルを見てまねしてください。
 
@@ -167,3 +169,89 @@ Web ゲームもアプリ（APK / AAB は ZIP 形式で、中の HTML / JavaScri
 | Play Console で電話番号確認が押せない | 本人確認と書類の審査が終わるまで待つ |
 | 審査が通って「公開」になったのに、ストアに表示されない（製品版が「非アクティブ」「リリースなし」） | リリースをオープンテストで作っていた。製品版に入ったのは国 / 地域の設定だけだった。「製品版」→「新しいリリースを作成」→「ライブラリから追加」で同じ App Bundle を選び、審査に送り直す（同じバージョンコードは再アップロードできないので、ライブラリから選ぶ） |
 | App Bundle が「有効」なのにストアにない | 「有効」はどこかのトラック（テスト含む）で使われているという意味。製品版に入っているとは限らない |
+
+---
+
+## 7. iOS 版（App Store）
+
+JET STRIKE の iOS 版で行ったことです。Android 版ができていれば、同じ Capacitor のプロジェクトに `ios/` を足すだけで作れます。Mac での作業手順は `docs/IOS_BUILD.md` にあります。
+
+### 7-1. もう済んでいること
+
+| 項目 | 状態 | ゲームごとに必要なこと |
+| --- | --- | --- |
+| Apple Developer Program | TECH GYM の組織で登録済み（Team ID `GNM3VTX9YG`） | なし（年会費 99 米ドルの更新だけ） |
+| App Store Connect | 利用可能 | アプリの作成 |
+| AdMob | Android と同じアカウント | iOS 用のアプリと広告ユニットを作る（Android とは別） |
+| app-ads.txt | 設置済み | なし（iOS も同じファイルで有効） |
+| Mac | ユーザーの自宅の Mac でビルドする | 手順は `docs/IOS_BUILD.md` |
+
+### 7-2. ゲームごとにやる手続き（ユーザーがブラウザで行う）
+
+1. **Apple Developer**（developer.apple.com）→「Certificates, Identifiers & Profiles」→「Identifiers」→「＋」→「App IDs」→「App」
+   - Description：ゲーム名を英数字で（例：`JET STRIKE`。記号や「〜」は使えないことがある）
+   - Bundle ID：「Explicit」で `jp.techgym.〇〇`（Android のパッケージ名とそろえる）
+   - Capabilities：何もチェックしない（AdMob やシェアに特別な機能は不要）
+2. **App Store Connect**（appstoreconnect.apple.com）→「マイ App」→「＋」→「新規 App」
+   - プラットフォーム：iOS ／ 名前：Google Play と同じ（30 文字以内、App Store 全体で重複不可）／ プライマリ言語：日本語
+   - バンドル ID：1 で登録したもの ／ SKU：ゲーム名の英字（例：`jetstrike`。あとから変更不可）／ ユーザアクセス：アクセス制限なし
+3. **AdMob**
+   - 「アプリを追加」→ **iOS** →「ストアに掲載されていない」で登録し、インタースティシャルとリワードの広告ユニットを作る
+   - アプリ ID と広告ユニット ID 2 つを Claude Code に渡す（広告ユニットを消して作り直したら、新しい ID を渡し直す）
+   - 「プライバシーとメッセージ」→「欧州の規制」のメッセージに iOS アプリも追加する
+4. **App Store Connect の入力**
+   - App 情報：カテゴリ「ゲーム」（サブカテゴリ「アクション」など）、プライバシーポリシー https://techgym.jp/privacy-policy/
+   - 価格：無料 ／ 年齢制限：質問に答える ／ App のプライバシー：AdMob が収集するデータを申告（`docs/IOS_BUILD.md` の 5 章）
+   - バージョンのページ：スクリーンショット、ヘッダ、検索結果の画像、説明文（Google Play 用の文章を流用）、サポート URL、著作権、ビルド
+
+### 7-3. 技術構成（Claude Code が行う）
+
+- `npm install @capacitor/ios@<@capacitor/core と同じ版>` → `npm run build` → `npx cap add ios`。Swift Package Manager の構成で `ios/` ができる（CocoaPods 不要）。クラウドの Linux でも生成できる
+- `ios/.gitignore` が `App/App/public` と生成された `capacitor.config.json` を除外するので、そのままコミットしてよい
+- **Xcode プロジェクト**（`ios/App/App.xcodeproj/project.pbxproj`）
+  - `DEVELOPMENT_TEAM = GNM3VTX9YG;`（`CODE_SIGN_STYLE = Automatic` のあとに追加）
+  - `TARGETED_DEVICE_FAMILY = 1;`（iPhone 専用。iPad 用のスクリーンショットが不要になる。iPad では iPhone 用の画面で動く）
+  - `MARKETING_VERSION = 1.0.0;`（`package.json` の version とそろえる）
+  - トラッキング確認の説明文を日英で出すため、`App/en.lproj/InfoPlist.strings` と `App/ja.lproj/InfoPlist.strings` を作り、PBXVariantGroup（InfoPlist.strings）・PBXFileReference・PBXBuildFile・Resources・`knownRegions` に `ja` を追加する
+- **Info.plist**（`ios/App/App/Info.plist`）
+  - `GADApplicationIdentifier`：AdMob の iOS 用アプリ ID
+  - `SKAdNetworkItems`：Google の `cstr6suwn9.skadnetwork`（Google の iOS 導入ガイドにある残りの ID も足すとよい）
+  - `NSUserTrackingUsageDescription`：トラッキング確認の説明（英語。日本語は ja.lproj で上書き）
+  - `CFBundleLocalizations`：`en`, `ja`
+  - `ITSAppUsesNonExemptEncryption`：false（輸出コンプライアンスの質問を省く）
+  - `UISupportedInterfaceOrientations`：横画面のゲームは LandscapeLeft / LandscapeRight だけ（縦画面のゲームなら Portrait だけ）
+  - `UIRequiresFullScreen`：true ／ `UIStatusBarHidden`：true ／ `UIViewControllerBasedStatusBarAppearance`：false
+  - `UIRequiredDeviceCapabilities`：`arm64`
+- **AppDelegate.swift**：`application.isIdleTimerDisabled = true`（プレイ中に画面を消さない）
+- **アイコン**：`Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png` を 1024×1024 の**透過なし**の画像に差し替える（`assets/icon-only.png` から作る）。起動画面（Splash.imageset の 3 枚、2732×2732）も差し替える
+- **`capacitor.config.json`**：`"ios": { "backgroundColor": "#000000" }`
+- **`package.json`** の scripts：
+  - `ios:sync`：`npm run build && npx cap sync ios`（テスト広告）
+  - `ios:release`：`ADMOB_MODE=production npm run build && npx cap sync ios`（本番広告。App Store 用はこちら）
+  - `ios:open`：`npx cap open ios`
+- **広告（`js/ads.js`）**
+  - 広告ユニットを `UNITS.android` と `UNITS.ios` に分け、`Capacitor.getPlatform()` で切り替える。iOS のテスト用ユニット：インタースティシャル `ca-app-pub-3940256099942544/4411468910`、リワード `ca-app-pub-3940256099942544/1712485313`
+  - 同意確認（UMP）のあと、iOS だけ `trackingAuthorizationStatus()` が `notDetermined` なら `requestTrackingAuthorization()` を呼ぶ（断られても広告は出せる）
+- **戻るボタン**（`@capacitor/app` の backButton）は iOS では呼ばれないだけなので、そのままでよい
+- **GitHub Actions**（`.github/workflows/ios.yml`）：`macos-latest` で `npm ci` → `npx cap sync ios` → `xcodebuild … -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build`。署名なしで「ビルドできるか」だけを push のたびに確認する（公開リポジトリなら無料）。署名とアップロードは Mac の Xcode で行う
+
+### 7-4. ストア用の画像（Claude Code が Playwright で撮影する）
+
+| 画像 | サイズ | 撮り方 |
+| --- | --- | --- |
+| スクリーンショット | **2622 × 1206**（iPhone 6.3 インチ、横向き）。日英 各 4 枚 | viewport 874 × 402、deviceScaleFactor 3、`isMobile` / `hasTouch` |
+| ヘッダ | 3840 × 1646（21:9） | viewport 1280 × 549 ×3 で撮って下を 1px 切る。HUD を消し、文字は入れない（App Store がアプリ名を重ねる） |
+| 検索結果 | 3840 × 2560（3:2） | viewport 1280 × 854 ×3 で撮って中央を切り出す |
+
+- App Store Connect のスクリーンショットの欄は「Dynamic Island 搭載 iPhone（中型ディスプレイ）」。**6.9 インチ（2868 × 1320）は受け付けられず、6.3 インチ（2622 × 1206）で通った**
+- 撮影のスクリプトは Google Play 用と同じ（場面を `__game` で作り、撮影中は自機の `hp` を大きくして撃墜されないようにする。敵空母撃沈の場面は、ミサイルが外れたら撃ち直す）
+- JPEG / PNG、透過なし。保存先は `docs/store/ios/`
+
+### 7-5. つまずいたところ（iOS）
+
+| 症状 | 原因と対処 |
+| --- | --- |
+| 6.9 インチのスクリーンショットがアップロードできない | 欄が「中型ディスプレイ」だった。2622 × 1206（6.3 インチ）で作り直す |
+| AdMob の広告ユニットが消えていた | 作り直して、新しい ID を `js/ads.js` に入れ直す |
+| ヘッダ・検索結果の欄が赤枠になる | ヘッダを入れたら、検索結果の画像（3:2）も入れる |
+| 本番広告とテスト広告の取り違え | App Store 用は必ず `npm run ios:release`。Xcode から実機で試すときは `npm run ios:sync` に戻す |

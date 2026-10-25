@@ -78,7 +78,8 @@ npm run ios:open
 
 | 項目 | 入力内容 |
 | --- | --- |
-| スクリーンショット | iPhone 6.9 インチ用（横向き 2868 × 1320）。`docs/store/ios/6.9inch/`（中型ディスプレイの欄で受け付けられない場合は `6.3inch/` の 2622 × 1206）の日本語版（ja-）と英語版（en-）各 4 枚。ヘッダは `appstore-header-3840x1646.png`、検索結果は `appstore-search-3840x2560.png` |
+| スクリーンショット | 「Dynamic Island 搭載 iPhone（中型ディスプレイ）」の欄に、`docs/store/ios/6.3inch/` の 2622 × 1206（横向き）を入れる。日本語版（ja-）と英語版（en-）各 4 枚。6.9 インチ（2868 × 1320）は受け付けられなかった |
+| ヘッダ・検索結果 | 「ヘッダと検索結果」タブに `docs/store/ios/appstore-header-3840x1646.png` と `appstore-search-3840x2560.png` |
 | プロモーション用テキスト・概要・キーワード | Google Play 用の文章（`docs/store/listing.md`）を流用 |
 | サポート URL | https://techgym.jp/ |
 | プライバシーポリシー URL（App 情報） | https://techgym.jp/privacy-policy/ |
