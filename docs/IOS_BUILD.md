@@ -78,7 +78,7 @@ npm run ios:open
 
 | 項目 | 入力内容 |
 | --- | --- |
-| スクリーンショット | iPhone 6.9 インチ用（横向き 2868 × 1320 など）。Claude Code で撮影して用意する |
+| スクリーンショット | iPhone 6.9 インチ用（横向き 2868 × 1320）。`docs/store/ios/` の日本語版（ja-）と英語版（en-）各 4 枚 |
 | プロモーション用テキスト・概要・キーワード | Google Play 用の文章（`docs/store/listing.md`）を流用 |
 | サポート URL | https://techgym.jp/ |
 | プライバシーポリシー URL（App 情報） | https://techgym.jp/privacy-policy/ |
