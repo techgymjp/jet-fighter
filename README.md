@@ -125,6 +125,15 @@ npm run android:open   # Android Studio で開く
 
 バージョン番号（versionCode）は Actions の実行回数が自動で使われます。表示用のバージョン名は `package.json` の `version` です。
 
+## iOS 版（App Store 配布用）
+
+Android 版と同じ Capacitor で、`ios/` に iOS のプロジェクトを入れています（Bundle ID は `jp.techgym.jetstrike`、iPhone の横画面固定）。
+
+- 広告は AdMob の iOS 用のアプリ・広告ユニットを使います（`js/ads.js` で OS ごとに切り替え）。起動時、同意確認のあとに「トラッキングの許可」（App Tracking Transparency）の確認画面を出します
+- `npm run ios:sync` はテスト広告、`npm run ios:release` は本番広告で、ゲームのファイルを iOS のプロジェクトにコピーします
+- ビルドとアップロードは Mac の Xcode で行います。手順は `docs/IOS_BUILD.md` にあります
+- GitHub Actions（`.github/workflows/ios.yml`）が、push のたびに iOS 版がビルドできるかを確認します（署名なし）
+
 ## スピード感・爽快感の演出
 
 - 速度に応じて広がる視野角（FOV）、流れるスピードライン、周辺減光、カメラ振動
