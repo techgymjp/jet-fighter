@@ -111,7 +111,7 @@ Google の「Apple の App Store のデータ開示要件への準備」（AdMob
 ## 7. 自動化の準備（2回目以降を GitHub Actions に任せる場合）
 
 Android 版と同じように、push するだけで GitHub Actions（GitHub の Mac 環境）がビルドし、App Store Connect（TestFlight）にアップロードできるようにするための準備です。
-**証明書の書き出しに Mac が必要**なので、家の Mac で 3 章の作業をするついでに行うと効率的です。ここで作るものはチーム（TECH GYM）共通なので、ほかのゲームの iOS 版でも使い回せます。
+**証明書の書き出しに Mac が必要**なので、家の Mac で 3 章の作業をするついでに行うと効率的です。ここで作るもの（API キーと証明書）は Apple Developer のチーム共通なので、ほかのゲームの iOS 版でも使い回せます。
 
 ### 7-1. App Store Connect の API キーを作る（ブラウザ）
 
@@ -146,7 +146,7 @@ base64 -i AuthKey_XXXXXXXXXX.p8 | tr -d '\n' | pbcopy
 | `ASC_ISSUER_ID` | Issuer ID |
 | `ASC_KEY_P8_BASE64` | API キー（.p8）を変換した文字列 |
 
-ほかのゲームでも使うなら、リポジトリごとではなく **組織（techgymjp）の Settings → Secrets and variables → Actions** に「Organization secrets」として登録すると、1回で全リポジトリから使えます。
+登録画面は `https://github.com/techgymjp/<リポジトリ名>/settings/secrets/actions`（リポジトリの「Settings」→「Secrets and variables」→「Actions」→「New repository secret」）です。techgymjp は組織ではなく個人のアカウントなので、全リポジトリ共通の Secrets は使えません。**ほかのゲームでも、そのリポジトリに同じ 5 つを登録します**（.p12・.p8 のファイルとパスワードを保管しておけば、同じものを使い回せます）。
 
 ### 7-4. そのあと
 
