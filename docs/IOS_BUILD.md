@@ -108,6 +108,52 @@ Google の「Apple の App Store のデータ開示要件への準備」（AdMob
 
 ---
 
+## 7. 自動化の準備（2回目以降を GitHub Actions に任せる場合）
+
+Android 版と同じように、push するだけで GitHub Actions（GitHub の Mac 環境）がビルドし、App Store Connect（TestFlight）にアップロードできるようにするための準備です。
+**証明書の書き出しに Mac が必要**なので、家の Mac で 3 章の作業をするついでに行うと効率的です。ここで作るものはチーム（TECH GYM）共通なので、ほかのゲームの iOS 版でも使い回せます。
+
+### 7-1. App Store Connect の API キーを作る（ブラウザ）
+
+1. App Store Connect の「ユーザとアクセス」→「統合」→「App Store Connect API」→「チームキー」を開く
+2. 「＋」（API キーを生成）を押し、名前（例：`GitHub Actions`）と役割「**App マネージャ**」を選んで生成する
+3. 表示された **キー ID** と、ページ上部の **Issuer ID** を控える
+4. 「API キーをダウンロード」で `AuthKey_XXXXXXXXXX.p8` を保存する（**ダウンロードは1回しかできない**。なくしたら作り直す）
+
+### 7-2. 配布用の証明書を書き出す（Mac）
+
+1. Xcode の「Settings…」→「Accounts」→ TECH GYM のチームを選び「Manage Certificates…」
+2. 「＋」→「**Apple Distribution**」で証明書を作る（3 章で Archive / Upload を済ませていれば、すでにできていることもある）
+3. Mac の「キーチェーンアクセス」を開き、「ログイン」→「自分の証明書」で「Apple Distribution: TECH GYM …」を右クリック →「書き出す」
+4. ファイル形式「個人情報交換（.p12）」で保存し、書き出し用のパスワードを決める
+
+### 7-3. GitHub に登録する
+
+ターミナルで、ファイルを文字列に変換してクリップボードにコピーします（1つずつ実行して、そのつど GitHub に貼り付ける）。
+
+```bash
+base64 -i 証明書.p12 | tr -d '\n' | pbcopy
+base64 -i AuthKey_XXXXXXXXXX.p8 | tr -d '\n' | pbcopy
+```
+
+リポジトリの Settings → Secrets and variables → Actions に、次の 5 つを登録します。
+
+| 名前 | 内容 |
+| --- | --- |
+| `IOS_DIST_CERT_P12_BASE64` | 証明書（.p12）を変換した文字列 |
+| `IOS_DIST_CERT_PASSWORD` | .p12 を書き出したときのパスワード |
+| `ASC_KEY_ID` | API キーのキー ID |
+| `ASC_ISSUER_ID` | Issuer ID |
+| `ASC_KEY_P8_BASE64` | API キー（.p8）を変換した文字列 |
+
+ほかのゲームでも使うなら、リポジトリごとではなく **組織（techgymjp）の Settings → Secrets and variables → Actions** に「Organization secrets」として登録すると、1回で全リポジトリから使えます。
+
+### 7-4. そのあと
+
+登録が終わったら、Claude Code に「iOS の自動アップロードのワークフローを作って」と頼みます。push するたびに、本番広告の設定でビルドし、ビルド番号（Actions の実行回数）を自動で上げて、TestFlight にアップロードするようにします。審査への提出は、これまでどおり App Store Connect で行います。
+
+**注意**：証明書（.p12）、そのパスワード、API キー（.p8）は、アップロード鍵と同じく、チャット・AI へのアップロード・リポジトリへのコミットで**絶対に共有しない**でください。誤って共有したら、App Store Connect で API キーを取り消し、証明書も取り消して作り直します。
+
 ## つまずきやすいところ
 
 | 症状 | 対処 |
