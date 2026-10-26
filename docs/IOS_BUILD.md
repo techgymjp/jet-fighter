@@ -116,7 +116,7 @@ Android 版と同じように、push するだけで GitHub Actions（GitHub の
 ### 7-1. App Store Connect の API キーを作る（ブラウザ）
 
 1. App Store Connect の「ユーザとアクセス」→「統合」→「App Store Connect API」→「チームキー」を開く
-2. 「＋」（API キーを生成）を押し、名前（例：`GitHub Actions`）と役割「**App マネージャ**」を選んで生成する
+2. 「＋」（API キーを生成）を押し、名前（例：`GitHub Actions`）とアクセス「**管理**」（Admin）を選んで生成する（GitHub Actions が署名用のプロファイルを自動で作るのに必要。初めての場合は先に「アクセスをリクエスト」を押す）
 3. 表示された **キー ID** と、ページ上部の **Issuer ID** を控える
 4. 「API キーをダウンロード」で `AuthKey_XXXXXXXXXX.p8` を保存する（**ダウンロードは1回しかできない**。なくしたら作り直す）
 
