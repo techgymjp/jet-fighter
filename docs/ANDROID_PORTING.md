@@ -223,7 +223,7 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 
 | 項目 | 状態 | ゲームごとに必要なこと |
 | --- | --- | --- |
-| Apple Developer Program | 登録済み（Team ID `GNM3VTX9YG`）。**最初は個人で登録していたため、組織（TECH GYM）への移行を Apple に申請中**。移行後も Team ID・アプリはそのまま | なし（年会費 99 米ドルの更新だけ） |
+| Apple Developer Program | **個人で登録**（Team ID `GNM3VTX9YG`）。組織への移行も検討したが、個人のまま続けると決めた（App Store の販売元は個人名になる） | なし（年会費 99 米ドルの更新だけ） |
 | App Store Connect | 利用可能 | アプリの作成 |
 | AdMob | Android と同じアカウント | iOS 用のアプリと広告ユニットを作る（Android とは別） |
 | app-ads.txt | 設置済み | なし（iOS も同じファイルで有効） |
@@ -296,6 +296,6 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 | --- | --- |
 | 6.9 インチのスクリーンショットがアップロードできない | 欄が「中型ディスプレイ」だった。2622 × 1206（6.3 インチ）で作り直す |
 | AdMob の広告ユニットが消えていた | 作り直して、新しい ID を `js/ads.js` に入れ直す |
-| Xcode の Team に会社名ではなく個人名が出る | Apple Developer に個人で登録していた。販売元に個人名が出て、EU の事業者申告では個人の連絡先が公開される。developer.apple.com/contact から「個人から組織への変更」を申し込む（D-U-N-S 番号が必要。数日〜数週間）。移行を待つ間もビルドのアップロードと TestFlight は進められる。審査への提出は移行後にする |
+| Xcode の Team に会社名ではなく個人名が出る | Apple Developer に個人で登録していた。販売元に個人名が出て、EU の事業者申告では個人の連絡先が公開される。developer.apple.com/contact から「個人から組織への変更」を申し込む（D-U-N-S 番号が必要。数日〜数週間）。移行を待つ間もビルドのアップロードと TestFlight は進められる。JET STRIKE では個人のまま続けることにした |
 | ヘッダ・検索結果の欄が赤枠になる | ヘッダを入れたら、検索結果の画像（3:2）も入れる |
 | 本番広告とテスト広告の取り違え | App Store 用は必ず `npm run ios:release`。Xcode から実機で試すときは `npm run ios:sync` に戻す |
