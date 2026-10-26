@@ -4,7 +4,7 @@ JET STRIKE の iOS 版は、Android 版と同じ Capacitor で作っています
 コードの準備はできているので、Mac では「ビルドして App Store Connect にアップロードする」作業だけを行います。
 
 - Bundle ID：`jp.techgym.jetstrike`（Android と同じ）
-- チーム：TECH GYM（Team ID `GNM3VTX9YG`。Xcode の設定に入れてあります）
+- チーム：Team ID `GNM3VTX9YG`（Xcode の設定に入れてあります）。最初は個人で登録していたので、組織（TECH GYM）への移行を申請中。移行後もこの Team ID のまま使えます。**審査への提出は、移行が終わってから行う**
 - 対応端末：iPhone（横画面固定）。iPad では iPhone 用の画面で動きます
 - 広告：AdMob（iOS 用のアプリと広告ユニット）。起動時に「トラッキングの許可」の確認画面が出ます
 
@@ -13,7 +13,7 @@ JET STRIKE の iOS 版は、Android 版と同じ Capacitor で作っています
 ## 1. Mac の準備（最初の1回だけ）
 
 1. **Xcode** を App Store からインストールする（数十 GB あるので時間がかかります）。インストール後に一度起動し、追加コンポーネントのインストールを済ませる
-2. Xcode の「Settings…」→「Accounts」→「＋」で、Apple Developer に登録している Apple ID でサインインする（チームに TECH GYM が表示されれば OK）
+2. Xcode の「Settings…」→「Accounts」→「＋」で、Apple Developer に登録している Apple ID でサインインする（チームが表示されれば OK。組織への移行が済むまでは個人名で表示される）
 3. **Node.js**（LTS 版）を https://nodejs.org/ からインストールする
 4. ターミナルでリポジトリを取得する
    ```bash
@@ -38,7 +38,7 @@ npm run ios:open    # Xcode で開く
 1. iPhone を USB ケーブルで Mac につなぎ、iPhone で「このコンピュータを信頼」を許可する
 2. iPhone の「設定」→「プライバシーとセキュリティ」→「デベロッパモード」をオンにする（再起動を求められます。項目がない場合は、Xcode で一度 iPhone を選ぶと表示されます）
 3. Xcode の上部で、実行先に自分の iPhone を選ぶ
-4. 左の「App」→「Signing & Capabilities」で、「Automatically manage signing」がオン、Team が「TECH GYM」になっていることを確認する
+4. 左の「App」→「Signing & Capabilities」で、「Automatically manage signing」がオン、Team にこのチーム（移行前は個人名、移行後は TECH GYM）が選ばれていることを確認する
 5. ▶（Run）を押すと、iPhone にアプリが入って起動する
 
 確認すること：横画面で全画面表示になる、トラッキングの確認画面が出る、操作できる、音が鳴る、ゲームオーバー後と「CONTINUE?」で**テスト広告**が出る、シェアができる。
@@ -122,7 +122,7 @@ Android 版と同じように、push するだけで GitHub Actions（GitHub の
 
 ### 7-2. 配布用の証明書を書き出す（Mac）
 
-1. Xcode の「Settings…」→「Accounts」→ TECH GYM のチームを選び「Manage Certificates…」
+1. Xcode の「Settings…」→「Accounts」→ チームを選び「Manage Certificates…」
 2. 「＋」→「**Apple Distribution**」で証明書を作る（3 章で Archive / Upload を済ませていれば、すでにできていることもある）
 3. Mac の「キーチェーンアクセス」を開き、「ログイン」→「自分の証明書」で「Apple Distribution: TECH GYM …」を右クリック →「書き出す」
 4. ファイル形式「個人情報交換（.p12）」で保存し、書き出し用のパスワードを決める
