@@ -304,4 +304,6 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 | Archive で「Xcode Cloud can automate…」が出る | 「Remind Me Later」で閉じてよい（自動化は GitHub Actions で行う） |
 | Xcode の「Product」メニューが見つからない | 画面最上部のメニューバーにある。全画面表示だと隠れるので、マウスを画面の上端に動かす |
 | 実行先に「iOS 26.x Not Installed」と出る | 「Get」で iOS のシミュレーターと部品をダウンロードする（8 GB ほど。Archive にも必要） |
+| 初回の審査で「Guideline 2.1 - Information Needed」（却下済み） | 審査の実績が少ない新しいアカウントへの定型の依頼。①**実機（最新の iOS）での操作の画面録画**（アプリの起動から）②アプリの目的と対象者 ③使い方（ログイン不要なら明記）④使っている外部サービス（AdMob など）⑤地域による違い ⑥規制業種・第三者の素材の有無、を App Review への返信で送り、同じ文をバージョンのページの「メモ」にも入れる。**iPhone を用意してから申請すると早い**（TestFlight で入れて画面収録）。実機がない場合はシミュレーターの録画（Simulator の File → Record Screen）で返信したが、受け付けられるかは不明 |
+| 返信に動画を添付すると「エラーが発生しました」 | 動画が大きすぎる（400MB でも失敗）。Finder で右クリック →「選択したビデオファイルをエンコード」→ 720p で小さくするか、Google ドライブの共有リンクを返信文に貼る |
 | 本番広告とテスト広告の取り違え | App Store 用は必ず `npm run ios:release`。Xcode から実機で試すときは `npm run ios:sync` に戻す |
