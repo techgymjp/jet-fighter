@@ -286,6 +286,11 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
   - 同意確認（UMP）のあと、iOS だけ `trackingAuthorizationStatus()` が `notDetermined` なら `requestTrackingAuthorization()` を呼ぶ（断られても広告は出せる）
 - **戻るボタン**（`@capacitor/app` の backButton）は iOS では呼ばれないだけなので、そのままでよい
 - **GitHub Actions**（`.github/workflows/ios.yml`）：`macos-latest` で `npm ci` → `npx cap sync ios` → `xcodebuild … -sdk iphonesimulator CODE_SIGNING_ALLOWED=NO build`。署名なしで「ビルドできるか」だけを push のたびに確認する（公開リポジトリなら無料）。署名とアップロードは Mac の Xcode で行う
+- **TestFlight への自動アップロード**（`docs/IOS_BUILD.md` の 7 章の Secrets 5 つを登録したら）：techgymjp/shutoko の `.github/workflows/ios-release.yml` と `scripts/ios_profile.py` をコピーし、`BUNDLE_ID` を書き換える。動きは次のとおり（2026-10 に shutoko で TestFlight へのアップロードまで確認済み）
+  - 既定のブランチへの push のたびに、本番広告（`ADMOB_MODE=production`）でビルド。ビルド番号は **100 + 実行回数**（Mac から手でアップロードする 1、2、… と重ならない）
+  - .p12 を一時的なキーチェーンに入れ、API キーで App Store 配布用のプロファイル（`<Bundle ID> AppStore CI`）を作る／取ってくる（`scripts/ios_profile.py`。Bundle ID が Apple Developer に登録済みであること）
+  - アプリ本体の Release だけを手動署名（Apple Distribution とそのプロファイル）に書き換えて Archive し、`xcodebuild -exportArchive`（`destination` = `upload`）で App Store Connect に送る
+  - Secrets がないリポジトリでは何もしない
 
 ### 7-4. ストア用の画像（Claude Code が Playwright で撮影する）
 
