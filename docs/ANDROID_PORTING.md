@@ -170,7 +170,7 @@ JET STRIKE（このリポジトリ）で、Web ゲームを Android アプリに
 5. **公開後**：AdMob でアプリを Google Play のストアに紐づける
 
 ストア用の画像と紹介文は、ゲームを自動操作してスクリーンショットを撮り、日英で下書きを作るところまで Claude Code に任せられる（このリポジトリの `docs/store/` が例）。
-紹介文（`docs/store/listing.md`）には、Google Play の欄（アプリ名 30 字・簡単な説明 80 字・詳しい説明）に加えて、**App Store だけの欄も日英で入れておく**（iOS 化のときにそのまま使える）。
+紹介文は、Google Play 用（`docs/store/listing.md`：アプリ名 30 字・簡単な説明 80 字・詳しい説明）と **App Store 用（`docs/store/ios/listing.md`）を別のファイルにする**（1 つにまとめると、どちらのストア用か分かりにくい）。App Store 用には、名前・概要（Google Play の詳しい説明を流用）に加えて、App Store だけの次の欄を日英で入れる。
 
 | App Store の欄 | 文字数 | 書き方 |
 | --- | --- | --- |
@@ -178,7 +178,7 @@ JET STRIKE（このリポジトリ）で、Web ゲームを Android アプリに
 | プロモーション用テキスト | 170 文字以内 | 説明の上に出る。審査なしでいつでも書き換えられる |
 | キーワード | 100 文字以内 | カンマ区切り・スペースなし。アプリ名に入っている語は入れなくてよい（検索には名前も使われる） |
 
-例：techgymjp/shutoko の `docs/store/listing.md` の「App Store（iOS）だけの欄」。
+例：techgymjp/shutoko の `docs/store/ios/listing.md`（App Store Connect のそのほかの欄〔サポート URL・著作権・カテゴリなど〕の表も入れてある）。
 
 ---
 
@@ -254,7 +254,7 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 4. **App Store Connect の入力**
    - App 情報：カテゴリ「ゲーム」（サブカテゴリ「アクション」など）、プライバシーポリシー https://techgym.jp/privacy-policy/
    - 価格：無料 ／ 年齢制限：質問に答える ／ App のプライバシー：AdMob が収集するデータを申告（`docs/IOS_BUILD.md` の 5 章）
-   - バージョンのページ：スクリーンショット、ヘッダ、検索結果の画像、説明文（Google Play 用の文章を流用）、サブタイトル・プロモーション用テキスト・キーワード（`docs/store/listing.md` の App Store だけの欄。3 章の終わり）、サポート URL、著作権、ビルド
+   - バージョンのページ：スクリーンショット、ヘッダ、検索結果の画像、説明文（Google Play 用の文章を流用）、名前・サブタイトル・プロモーション用テキスト・概要・キーワード（`docs/store/ios/listing.md`。3 章の終わり）、サポート URL、著作権、ビルド
 
 ### 7-3. 技術構成（Claude Code が行う）
 
