@@ -290,6 +290,25 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 - 撮影のスクリプトは Google Play 用と同じ（場面を `__game` で作り、撮影中は自機の `hp` を大きくして撃墜されないようにする。敵空母撃沈の場面は、ミサイルが外れたら撃ち直す）
 - JPEG / PNG、透過なし。保存先は `docs/store/ios/`
 
+### 7-6. 審査へのメモ（ひな形）
+
+初回の審査で「Guideline 2.1 - Information Needed」が来る前提で、**最初の提出のときから**バージョンのページの「App Review に関する情報」→「メモ」に入れておく（英語で書く）。ゲームごとに〔 〕の中を書き換える。
+録画（実機での操作の画面収録）はメモの文には入れず、2.1 が来たら返信に添付する（TestFlight で入れて、アプリの起動から撮る。本番広告はタップしない）。
+
+```
+1. Purpose and audience: 〔ゲーム名〕 is a free 〔ジャンル〕 game for ages 13+. 〔ひとことで遊び方〕
+
+2. How to use: No login or account is needed. 〔最初の画面から遊び始めるまでの操作。日本語だけの画面なら「All text in the game is Japanese.」と書く〕
+
+3. External services: Google AdMob (〔banner / interstitial / rewarded〕 ads) with Google's consent form (UMP) and App Tracking Transparency. 〔リワード広告の使い道。例: Rewarded ads are optional: watching one lets the player 〜〕 No other services or in-app purchases.
+
+4. Regional differences: None, except that the ad consent form appears only where required (e.g. EEA/UK).
+
+5. Regulated content / third-party material: The game is not in a regulated industry. 〔第三者の素材がなければ「All graphics and sounds are original.」。地図や都市モデルなどのオープンデータを使っていれば、出典・ライセンスと、アプリ内に表示していること〕
+```
+
+例（techgymjp/shutoko 首都高グランプリ）：`docs/IOS_BUILD.md` の 5 章「審査へのメモ」。
+
 ### 7-5. つまずいたところ（iOS）
 
 | 症状 | 原因と対処 |
@@ -304,6 +323,6 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 | Archive で「Xcode Cloud can automate…」が出る | 「Remind Me Later」で閉じてよい（自動化は GitHub Actions で行う） |
 | Xcode の「Product」メニューが見つからない | 画面最上部のメニューバーにある。全画面表示だと隠れるので、マウスを画面の上端に動かす |
 | 実行先に「iOS 26.x Not Installed」と出る | 「Get」で iOS のシミュレーターと部品をダウンロードする（8 GB ほど。Archive にも必要） |
-| 初回の審査で「Guideline 2.1 - Information Needed」（却下済み） | 審査の実績が少ない新しいアカウントへの定型の依頼。①**実機（最新の iOS）での操作の画面録画**（アプリの起動から）②アプリの目的と対象者 ③使い方（ログイン不要なら明記）④使っている外部サービス（AdMob など）⑤地域による違い ⑥規制業種・第三者の素材の有無、を App Review への返信で送り、同じ文をバージョンのページの「メモ」にも入れる。**iPhone を用意してから申請すると早い**（TestFlight で入れて画面収録）。実機がない場合はシミュレーターの録画（Simulator の File → Record Screen）で返信したが、受け付けられるかは不明 |
+| 初回の審査で「Guideline 2.1 - Information Needed」（却下済み） | 審査の実績が少ない新しいアカウントへの定型の依頼。①**実機（最新の iOS）での操作の画面録画**（アプリの起動から）②アプリの目的と対象者 ③使い方（ログイン不要なら明記）④使っている外部サービス（AdMob など）⑤地域による違い ⑥規制業種・第三者の素材の有無、を App Review への返信で送り、同じ文をバージョンのページの「メモ」にも入れる。②〜⑥は下の 7-6 のひな形を使い、①の録画は返信に添付する（メモの文には録画の項目を入れない）。**iPhone を用意してから申請すると早い**（TestFlight で入れて画面収録）。実機がない場合はシミュレーターの録画（Simulator の File → Record Screen）で返信したが、受け付けられるかは不明 |
 | 返信に動画を添付すると「エラーが発生しました」 | 動画が大きすぎる（400MB でも失敗）。Finder で右クリック →「選択したビデオファイルをエンコード」→ 720p で小さくするか、Google ドライブの共有リンクを返信文に貼る |
 | 本番広告とテスト広告の取り違え | App Store 用は必ず `npm run ios:release`。Xcode から実機で試すときは `npm run ios:sync` に戻す |
