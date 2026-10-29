@@ -155,6 +155,12 @@ body.touch .kb, body.touch .controls { display: none; }
   background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.4); color: #d8e4f0; font-weight: normal; }
 .screen .langBtn.on { background: rgba(255,138,31,.85); border-color: #ff8a1f; color: #fff; font-weight: bold; }
 @media (max-height: 500px) { .langSel { margin-top: 6px; } .screen .langBtn { font-size: 12px; padding: 4px 12px; } }
+/* Web 版だけに出すアプリ版へのリンク（アプリの中では出さない） */
+.storeLinks { margin-top: 10px; }
+.storeLinks a { display: inline-block; font-size: 14px; padding: 6px 16px; border-radius: 16px; color: #fff; text-decoration: none;
+  background: rgba(0,0,0,.45); border: 1px solid rgba(120,220,140,.7); }
+.storeLinks a:hover { background: rgba(40,140,70,.6); }
+@media (max-height: 500px) { .storeLinks { margin-top: 6px; } .storeLinks a { font-size: 12px; padding: 4px 12px; } }
 /* 横向きスマホでは結果カードを詰めて、ボタンまで画面内に収める */
 .screen { justify-content: safe center; }
 @media (max-height: 500px) {
