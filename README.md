@@ -53,6 +53,8 @@
 
 ## Android 版（Google Play 配布用）
 
+Google Play で公開中です：https://play.google.com/store/apps/details?id=jp.techgym.jetstrike
+
 [Capacitor](https://capacitorjs.com/) でゲームのファイルをアプリ内に同梱しているため、ネットにつながっていなくても遊べます。
 
 - 横画面固定・全画面表示（ステータスバー／ナビゲーションバーを隠す）
