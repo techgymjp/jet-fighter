@@ -87,7 +87,7 @@ npm run ios:open
 | ビルド | TestFlight で確認したビルドを選ぶ |
 | 年齢制限 | 質問に答える（戦闘機や艦船を破壊する表現あり。人物・流血の描写なし） |
 | App のプライバシー | AdMob が収集するデータを申告する（下記） |
-| App Review に関する情報 | ログイン不要。連絡先を入力。メモに「広告（AdMob）を表示し、起動時に App Tracking Transparency の確認を行います」と書いておくとよい |
+| App Review に関する情報 | ログイン不要。連絡先を入力。メモに下の「審査へのメモ」を貼る |
 
 **App のプライバシー（AdMob を使うアプリの目安）**
 Google の「Apple の App Store のデータ開示要件への準備」（AdMob のヘルプ）に、AdMob が収集するデータの一覧があります。必ずそちらを見て最終確認してください。目安は次のとおりです。
@@ -96,6 +96,24 @@ Google の「Apple の App Store のデータ開示要件への準備」（AdMob
 - 目的：サードパーティ広告、アナリティクス
 - ユーザーに関連付け：しない
 - トラッキングに使用：デバイス ID と広告データは「する」
+
+**審査へのメモ（App Review に関する情報の「メモ」に貼る。`docs/ANDROID_PORTING.md` 7-6 のひな形どおり。初回に「Guideline 2.1 - Information Needed」が来たら、同じ文を返信する）**
+
+```
+1. Purpose and audience: JET STRIKE is a free 3D jet fighter action game for ages 13+. Players launch from an aircraft carrier by catapult, shoot down enemy fighters with guns and lock-on missiles, sink the enemy carrier, and return to land on their own carrier to refuel and rearm.
+
+2. How to use: No login or account is needed. Tap "LAUNCH" (出撃する) on the title screen. Fly with the virtual stick on the left; the buttons on the right are gun, MSL (missile), AB (afterburner), brake, launch/land and camera. The game is in Japanese and English (it follows the device language and can be switched on the title screen).
+
+3. External services: Google AdMob (interstitial and rewarded ads) with Google's consent form (UMP) and App Tracking Transparency. Rewarded ads are optional: when the player loses the last life, the "CONTINUE?" screen lets them watch one to get one extra life (once per game). The share button uses the iOS share sheet. No other services or in-app purchases.
+
+4. Regional differences: None, except that the ad consent form appears only where required (e.g. EEA/UK).
+
+5. Regulated content / third-party material: The game is not in a regulated industry. All graphics and sounds are original: the aircraft, carriers and effects are 3D models built in code, and the music and sound effects are synthesized in real time. The only third-party component is the open-source three.js library (MIT License). The combat is between fictional aircraft and ships; there are no people or blood.
+
+6. Originality (Guideline 4.3): JET STRIKE is an original app that we designed and built ourselves. It does not copy or imitate any other app, and it is not made from a template, a purchased source code or a re-skin of another game. All 3D models, effects, music and sound effects were created specifically for this app. It is also not a template-based variation of our other apps. Each of our games has its own game system that we designed and programmed individually for that title, and we do not reuse a game template from one app to make another, even when two of our games are in the same genre. This game's system (the jet flight model with afterburner and fuel; catapult launches and arrested landings on the carrier with refueling, repair and rearming; missile lock-on; enemy carriers with anti-aircraft fire; and the stage and lives system) was built only for this title, and its gameplay, content and visuals are its own. Only standard technical parts, such as the Capacitor app shell and the AdMob ad integration, are shared across our apps.
+
+7. App functionality (Guideline 4.2): The app is not a website wrapper. All game content (code, 3D models, effects, music, sounds and texts) is bundled in the app and fully playable offline (only ads and sharing need a connection). It also uses native iOS features such as the share sheet and App Tracking Transparency.
+```
 
 入力が終わったら「審査用に追加」→「審査へ提出」。
 
