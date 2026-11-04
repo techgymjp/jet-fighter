@@ -320,14 +320,14 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 
 5. Regulated content / third-party material: The game is not in a regulated industry. 〔第三者の素材がなければ「All graphics and sounds are original.」。地図や都市モデルなどのオープンデータを使っていれば、出典・ライセンスと、アプリ内に表示していること〕
 
-6. Uniqueness (Guideline 4.3): 〔ゲーム名〕 is an original, standalone game, not a template or a re-skin of another app. Its concept (〔ひとことでゲームの中身〕) is different in genre from our other apps. 〔このアプリのために作ったもの。例: All 145 fish illustrations and the 100 tips were created specifically for this app.〕
+6. Originality (Guideline 4.3): 〔ゲーム名〕 is an original app that we designed and built ourselves. It does not copy or imitate any other app, and it is not made from a template, a purchased source code or a re-skin of another game. 〔このアプリのために作ったもの。例: All 145 fish illustrations and the 100 tips were created specifically for this app.〕
 
 7. App functionality (Guideline 4.2): The app is not a website wrapper. All game content (〔code, 3D models, illustrations, sounds and texts など〕) is bundled in the app and fully playable offline. It also uses native iOS features such as the share sheet and App Tracking Transparency.
 ```
 
 6 と 7 は、デザインスパム（Guideline 4.3 Spam）と最低限の機能（Guideline 4.2 Minimum Functionality）への先回りの説明。
 同じ開発者アカウントから Capacitor の同じ構成のアプリを続けて出すと「同じ作りのアプリの量産」、Web の技術（WebView）で作ったアプリは「Web サイトを包んだだけ」と見られることがあるので、最初の提出から入れておく。
-6 の「different in genre from our other apps」は、同じアカウントで出しているほかのアプリとジャンルが違うときだけ書く（同じジャンルのアプリがあるなら、遊び方や内容のどこが違うかを具体的に書く）。
+6 では、ほかのアプリを真似していない、自分たちで企画して作ったオリジナルのアプリだということを伝える（テンプレートや購入したソースコード、ほかのゲームの見た目を変えただけのものではない）。〔 〕には、そのアプリのために作った絵・音・データなどを具体的に書く。
 
 例（techgymjp/shutoko 首都高グランプリ）：`docs/IOS_BUILD.md` の 5 章「審査へのメモ」。例（techgymjp/shiwake 魚仕分け。6・7 入り）：`docs/store/ios/review-notes.txt`。
 
