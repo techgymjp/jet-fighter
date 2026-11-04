@@ -319,9 +319,19 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 4. Regional differences: None, except that the ad consent form appears only where required (e.g. EEA/UK).
 
 5. Regulated content / third-party material: The game is not in a regulated industry. 〔第三者の素材がなければ「All graphics and sounds are original.」。地図や都市モデルなどのオープンデータを使っていれば、出典・ライセンスと、アプリ内に表示していること〕
+
+6. Originality (Guideline 4.3): This app was designed and written specifically for this game. It is not made from a template, an app builder or a reskin of another app.
+- Original content: 〔このゲームのために作った中身。例: a curated set of 177 kanji with readings and English names / 16 courses built from open map data〕
+- Original gameplay: 〔ほかにない遊び方・仕組みを 1〜2 文で。例: how the questions or stages are generated, what the player competes on〕
+- Other apps from this developer are completely different games (〔同じアカウントのほかのゲームのジャンル。例: a 3D jet fighter action game and a 3D highway racing game〕). They share only common technology (Capacitor and the AdMob SDK), not gameplay, graphics or content. 〔同じジャンルのアプリがなければ「This is the developer's only 〔ジャンル〕 app, and no duplicate or near-duplicate version has been submitted.」〕
 ```
 
-例（techgymjp/shutoko 首都高グランプリ）：`docs/IOS_BUILD.md` の 5 章「審査へのメモ」。
+6 は「Guideline 4.3 - Design - Spam」（似たアプリの量産）と判断されないための説明。同じアカウントから Capacitor と AdMob の同じ構成でゲームを何本も出すので、最初から入れておく。
+- 中身と遊び方は、そのゲームにしかないものを具体的に書く（数・仕組み・競うもの）。「楽しい」「たくさん」のような言葉だけにしない
+- ほかのアプリと共通なのは技術（Capacitor・AdMob）だけで、遊び方・絵・中身は別だと書く
+- 最後の一文（同じジャンルのアプリはない）は、本当にそうか確かめてから入れる。同じジャンルのアプリがあるなら、違いを具体的に書く
+
+例（techgymjp/shutoko 首都高グランプリ）：`docs/IOS_BUILD.md` の 5 章「審査へのメモ」。6 まで入れた例は techgymjp/sakanahen（さかなへんクイズ）の `docs/IOS_BUILD.md` の 5 章。
 
 ### 7-5. つまずいたところ（iOS）
 
