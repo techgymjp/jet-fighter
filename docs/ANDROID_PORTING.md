@@ -318,18 +318,20 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 
 4. Regional differences: None, except that the ad consent form appears only where required (e.g. EEA/UK).
 
-5. Regulated content / third-party material: The game is not in a regulated industry. 〔第三者の素材がなければ「All graphics and sounds are original.」。地図や都市モデルなどのオープンデータを使っていれば、出典・ライセンスと、アプリ内に表示していること〕
+5. Regulated content / third-party material: The game is not in a regulated industry. 〔第三者の素材がなければ「All graphics and sounds are original.」。地図や都市モデルなどのオープンデータを使っていれば、出典・ライセンスと、アプリ内に表示していること〕 〔危ないことを題材にするゲーム（毒草・毒きのこ、運転など）なら、その行為を勧めていないことと、アプリ内の注意書き。例: The game does not encourage eating wild plants; the title screen warns players not to pick or eat anything they cannot identify with certainty.〕
 
-6. Originality (Guideline 4.3): 〔ゲーム名〕 is an original app that we designed and built ourselves. It does not copy or imitate any other app, and it is not made from a template, a purchased source code or a re-skin of another game. 〔このアプリのために作ったもの。例: All 145 fish illustrations and the 100 tips were created specifically for this app.〕
+6. Originality (Guideline 4.3): 〔ゲーム名〕 is an original app that we designed and built ourselves. It does not copy or imitate any other app, and it is not made from a template, a purchased source code or a re-skin of another game. 〔このアプリのために作ったもの。例: All 145 fish illustrations and the 100 tips were created specifically for this app.〕 It is also not a template-based variation of our other apps: its game system (〔このゲームだけの仕組み。例: the real-time field where plants and mushrooms sprout and wither, the lookalike-based spawning and difficulty curve, the lives and continue system〕) was designed and programmed individually for this title, and it differs from our other apps in genre, gameplay, content and visuals. Only standard technical parts, such as the Capacitor app shell and the AdMob ad integration, are shared across our apps.
 
 7. App functionality (Guideline 4.2): The app is not a website wrapper. All game content (〔code, 3D models, illustrations, sounds and texts など〕) is bundled in the app and fully playable offline. It also uses native iOS features such as the share sheet and App Tracking Transparency.
 ```
 
 6 と 7 は、デザインスパム（Guideline 4.3 Spam）と最低限の機能（Guideline 4.2 Minimum Functionality）への先回りの説明。
 同じ開発者アカウントから Capacitor の同じ構成のアプリを続けて出すと「同じ作りのアプリの量産」、Web の技術（WebView）で作ったアプリは「Web サイトを包んだだけ」と見られることがあるので、最初の提出から入れておく。
+5 では、毒草・毒きのこや運転など、まねすると危ないことを題材にするゲームなら、その行為を勧めていないことと、アプリ内の注意書き（タイトル画面など）を書く。
 6 では、ほかのアプリを真似していない、自分たちで企画して作ったオリジナルのアプリだということを伝える（テンプレートや購入したソースコード、ほかのゲームの見た目を変えただけのものではない）。〔 〕には、そのアプリのために作った絵・音・データなどを具体的に書く。
+あわせて、**自社のほかのアプリのテンプレートでもなく**、ゲームの仕組みをそのタイトルのために個別に作ったことを、そのゲームだけの仕組みを挙げて書く。ただし Capacitor の土台や AdMob の広告の処理（`js/ads.js`）は各アプリで共通なので、「技術的な部分だけは共通」と正直に書く（何も共通していないとは書かない）。
 
-例（techgymjp/shutoko 首都高グランプリ）：`docs/IOS_BUILD.md` の 5 章「審査へのメモ」。例（techgymjp/shiwake 魚仕分け。6・7 入り）：`docs/store/ios/review-notes.txt`。
+例（techgymjp/shutoko 首都高グランプリ）：`docs/IOS_BUILD.md` の 5 章「審査へのメモ」。例（techgymjp/shiwake 魚仕分け。6・7 入り）：`docs/store/ios/review-notes.txt`。例（techgymjp/taverna 食べるな危険。5 の注意書きと 6 の「自社アプリのテンプレートではない」入り）：`docs/IOS_BUILD.md` の 5 章。
 
 ### 7-5. つまずいたところ（iOS）
 
