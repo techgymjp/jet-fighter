@@ -5,11 +5,12 @@
   "description": "JET STRIKE 〜音速の翼〜 ジェット戦闘機 3D ゲーム（Web / Android / iOS）",
   "scripts": {
     "build": "node scripts/build-web.js",
-    "android:sync": "npm run build && npx cap sync android",
+    "android:sync": "npm run build:app && npx cap sync android",
     "android:open": "npx cap open android",
-    "ios:sync": "npm run build && npx cap sync ios",
-    "ios:release": "ADMOB_MODE=production npm run build && npx cap sync ios",
-    "ios:open": "npx cap open ios"
+    "ios:sync": "npm run build:app && npx cap sync ios",
+    "ios:release": "ADMOB_MODE=production npm run build:app && npx cap sync ios",
+    "ios:open": "npx cap open ios",
+    "build:app": "node scripts/build-web.js --app"
   },
   "dependencies": {
     "@capacitor-community/admob": "^8.2.1",

@@ -1,4 +1,4 @@
-// Android アプリに同梱する Web ファイルを www/ にコピーする
+// Web 版（Vercel）とアプリ（Android / iOS）に使うファイルを www/ にまとめる。アプリ用は --app を付ける
 const fs = require('fs');
 const path = require('path');
 
@@ -17,4 +17,19 @@ const version = process.env.VERSION_CODE
   ? `v${process.env.VERSION_NAME || require('../package.json').version} (build ${process.env.VERSION_CODE})`
   : 'dev';
 fs.writeFileSync(path.join(out, 'js', 'build-info.js'), `// ビルド時に生成\nwindow.APP_VERSION = '${version}';\n`);
-console.log(`built web assets into www/ (ads: ${mode}, version: ${version})`);
+// アプリ（Android / iOS）に入れるときは、Web 版だけの要素をファイルから取り除く。
+// 非表示にするだけだと「審査で見えない機能」が入ったままになる（App Store Guideline 5.6）ため
+const app = process.argv.includes('--app');
+if (app) {
+  const strip = (file, marker) => {
+    const f = path.join(out, file);
+    const lines = fs.readFileSync(f, 'utf8').split('\n');
+    const kept = lines.filter(l => !l.includes(marker));
+    if (kept.length === lines.length) throw new Error(`${marker} not found in ${file}`);
+    fs.writeFileSync(f, kept.join('\n'));
+  };
+  strip('index.html', 'id="storeLinks"');        // Google Play へのリンク
+  strip('js/i18n.js', "'title.getAndroid'");     // その文言
+  strip('js/main.js', '@web-only');                // 撮影・テスト用の window.__game など
+}
+console.log(`built web assets into www/ (${app ? 'app' : 'web'}, ads: ${mode}, version: ${version})`);

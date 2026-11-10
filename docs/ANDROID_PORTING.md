@@ -278,8 +278,9 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 - **アイコン**：`Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png` を 1024×1024 の**透過なし**の画像に差し替える（`assets/icon-only.png` から作る）。起動画面（Splash.imageset の 3 枚、2732×2732）も差し替える
 - **`capacitor.config.json`**：`"ios": { "backgroundColor": "#000000" }`
 - **`package.json`** の scripts：
-  - `ios:sync`：`npm run build && npx cap sync ios`（テスト広告）
-  - `ios:release`：`ADMOB_MODE=production npm run build && npx cap sync ios`（本番広告。App Store 用はこちら）
+  - `ios:sync`：`npm run build:app && npx cap sync ios`（テスト広告）
+  - `build:app`：`node scripts/build-web.js --app`。**アプリに入れるファイルからは、Web 版だけの要素（他ストアへのリンク、撮影・テスト用の `window.__game` など。main.js では行末に `// @web-only` を付けた行）を取り除く**。非表示にするだけでは「審査で見えない機能」として Guideline 5.6 で却下される。Android・iOS の sync とワークフローもすべて `build:app` を使う。Vercel（Web 版）は今までどおり `npm run build`
+  - `ios:release`：`ADMOB_MODE=production npm run build:app && npx cap sync ios`（本番広告。App Store 用はこちら）
   - `ios:open`：`npx cap open ios`
 - **広告（`js/ads.js`）**
   - 広告ユニットを `UNITS.android` と `UNITS.ios` に分け、`Capacitor.getPlatform()` で切り替える。iOS のテスト用ユニット：インタースティシャル `ca-app-pub-3940256099942544/4411468910`、リワード `ca-app-pub-3940256099942544/1712485313`
@@ -323,9 +324,16 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 6. Originality (Guideline 4.3): 〔ゲーム名〕 is an original app that we designed and built ourselves. It does not copy or imitate any other app, and it is not made from a template, a purchased source code or a re-skin of another game. 〔このアプリのために作ったもの。例: All 145 fish illustrations and the 100 tips were created specifically for this app.〕 It is also not a template-based variation of our other apps. Each of our games has its own game system that we designed and programmed individually for that title, and we do not reuse a game template from one app to make another, even when two of our games are in the same genre. This game's system (〔このゲームだけの仕組み。例: the real-time field where plants and mushrooms sprout and wither, the lookalike-based spawning and difficulty curve, the lives and continue system〕) was built only for this title, and its gameplay, content and visuals are its own. Only standard technical parts, such as the Capacitor app shell and the AdMob ad integration, are shared across our apps. We publish this game as a single app with one Bundle ID; there are no other versions of it on the App Store (for example, no separate free and paid editions or regional copies).
 
 7. App functionality (Guideline 4.2): The app is not a website wrapper. All game content (〔code, 3D models, illustrations, sounds and texts など〕) is bundled in the app and fully playable offline. It also uses native iOS features such as the share sheet and App Tracking Transparency.
+
+8. Features that appear only in some situations (Guideline 5.6): The app has no hidden, dormant or remotely enabled features. It behaves the same during review as for all users, and it does not download or run code from the internet. These parts appear only under certain conditions:
+〔条件によって出る画面・ボタンを全部、1 行ずつ。例: - "CONTINUE?" screen: appears when the player loses the last life, once per game, only if a rewarded ad could be loaded.〕
+〔例: - "Ad settings" link: appears only where Google's consent form is required (e.g. EEA/UK).〕
+〔例: - Interstitial ad: shown after every second retry.〕
+The app contains no debug menu, no test switches and no links to other app stores.
 ```
 
 6 と 7 は、デザインスパム（Guideline 4.3 Spam）と最低限の機能（Guideline 4.2 Minimum Functionality）への先回りの説明。
+8 は「審査で見えない機能」（Guideline 5.6 Developer Code of Conduct）への先回りの説明。条件によって出る画面やボタン（CONTINUE、EU だけの広告の設定、言語の切り替えなど）を**全部**書き、デバッグ用の仕組みや他ストアへのリンクがアプリに入っていないことを書く（7-3 の `build:app` で取り除いてから書く）。
 同じ開発者アカウントから Capacitor の同じ構成のアプリを続けて出すと「同じ作りのアプリの量産」、Web の技術（WebView）で作ったアプリは「Web サイトを包んだだけ」と見られることがあるので、最初の提出から入れておく。
 5 では、毒草・毒きのこや運転など、まねすると危ないことを題材にするゲームなら、その行為を勧めていないことと、アプリ内の注意書き（タイトル画面など）を書く。
 6 では、ほかのアプリを真似していない、自分たちで企画して作ったオリジナルのアプリだということを伝える（テンプレートや購入したソースコード、ほかのゲームの見た目を変えただけのものではない）。〔 〕には、そのアプリのために作った絵・音・データなどを具体的に書く。
@@ -352,4 +360,5 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 | Xcode の「Product」メニューが見つからない | 画面最上部のメニューバーにある。全画面表示だと隠れるので、マウスを画面の上端に動かす |
 | 実行先に「iOS 26.x Not Installed」と出る | 「Get」で iOS のシミュレーターと部品をダウンロードする（8 GB ほど。Archive にも必要） |
 | 初回の審査で「Guideline 2.1 - Information Needed」（却下済み） | 審査の実績が少ない新しいアカウントへの定型の依頼。アプリの目的と対象者・使い方（ログイン不要なら明記）・使っている外部サービス（AdMob など）・地域による違い・規制業種や第三者の素材の有無を、7-6 のひな形の文で App Review に返信し、同じ文をバージョンのページの「メモ」にも入れる。実機の画面録画の添付は不要 |
+| 「Guideline 5.6 - Developer Code of Conduct」（審査で見えない機能がある）で却下 | アプリの中に、画面に出ないのにコードとして入っているものがあった（Web 版用の Google Play へのリンクを非表示にしただけで同梱、撮影用の `window.__game`）。`build:app` でアプリ用のファイルから取り除き、7-6 のメモの 8 で、条件によって出る機能（CONTINUE、EU だけの広告の設定など）をすべて説明して、新しいビルドで再提出する |
 | 本番広告とテスト広告の取り違え | App Store 用は必ず `npm run ios:release`。Xcode から実機で試すときは `npm run ios:sync` に戻す |

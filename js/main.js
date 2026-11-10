@@ -204,7 +204,7 @@
   // どのビルドが入っているか分かるよう、アプリ版はタイトル画面にバージョンを出す
   if (window.APP_VERSION && window.APP_VERSION !== 'dev') $('buildInfo').textContent = window.APP_VERSION;
   // Web 版だけ、アプリ版（Google Play）へのリンクを出す。アプリの中では出さない（iOS 版で他ストアへのリンクは審査で問題になる）
-  if (!NATIVE) $('storeLinks').classList.remove('hidden');
+  if (!NATIVE && $('storeLinks')) $('storeLinks').classList.remove('hidden');
 
   // EU など同意が必要な地域では、タイトル画面から広告の同意内容を変更できるようにする
   Ads.initDone.then(() => { if (Ads.privacyOptionsRequired) $('adPrivacy').classList.remove('hidden'); });
@@ -1574,5 +1574,5 @@
   requestAnimationFrame(loop);
 
   // デバッグ・自動テスト用
-  window.__game = { G, player, enemies, get enemyCarrier() { return enemyCarrier; }, home, startGame, tryLaunch, tryLanding, fireMissile, keys };
+  window.__game = { G, player, enemies, get enemyCarrier() { return enemyCarrier; }, home, startGame, tryLaunch, tryLanding, fireMissile, keys }; // @web-only（スクリーンショット撮影・動作確認用。アプリ用のビルドでは取り除く）
 })();

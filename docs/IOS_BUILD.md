@@ -113,6 +113,14 @@ Google の「Apple の App Store のデータ開示要件への準備」（AdMob
 6. Originality (Guideline 4.3): JET STRIKE is an original app that we designed and built ourselves. It does not copy or imitate any other app, and it is not made from a template, a purchased source code or a re-skin of another game. All 3D models, effects, music and sound effects were created specifically for this app. It is also not a template-based variation of our other apps. Each of our games has its own game system that we designed and programmed individually for that title, and we do not reuse a game template from one app to make another, even when two of our games are in the same genre. This game's system (the jet flight model with afterburner and fuel; catapult launches and arrested landings on the carrier with refueling, repair and rearming; missile lock-on; enemy carriers with anti-aircraft fire; and the stage and lives system) was built only for this title, and its gameplay, content and visuals are its own. Only standard technical parts, such as the Capacitor app shell and the AdMob ad integration, are shared across our apps. We publish this game as a single app with one Bundle ID; there are no other versions of it on the App Store (for example, no separate free and paid editions or regional copies).
 
 7. App functionality (Guideline 4.2): The app is not a website wrapper. All game content (code, 3D models, effects, music, sounds and texts) is bundled in the app and fully playable offline (only ads and sharing need a connection). It also uses native iOS features such as the share sheet and App Tracking Transparency.
+
+8. Features that appear only in some situations (Guideline 5.6): The app has no hidden, dormant or remotely enabled features. It behaves the same during review as for all users, and it does not download or run code from the internet. These parts appear only under certain conditions:
+- "CONTINUE?" screen: appears when the player loses the last life, once per game, only if a rewarded ad could be loaded. Watching the ad gives one extra life; "Give up" goes to the results.
+- Interstitial ad: shown after every second tap on "Retry" on the results screen.
+- "Ad settings" link on the title screen: appears only where Google's consent form is required (e.g. EEA/UK) and reopens that form.
+- Language buttons (日本語 / English) on the title screen switch the language at any time.
+- Switching to another app (or an incoming call) pauses the game.
+The app contains no debug menu, no test switches and no links to other app stores.
 ```
 
 入力が終わったら「審査用に追加」→「審査へ提出」。
