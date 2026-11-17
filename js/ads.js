@@ -7,10 +7,12 @@ const Ads = (() => {
       test: {
         interstitial: 'ca-app-pub-3940256099942544/1033173712',
         rewarded: 'ca-app-pub-3940256099942544/5224354917',
+        banner: 'ca-app-pub-3940256099942544/9214589741',
       },
       production: {
         interstitial: 'ca-app-pub-6411535997477460/6932481991',
         rewarded: 'ca-app-pub-6411535997477460/2499072100',
+        banner: 'ca-app-pub-6411535997477460/9558645333',
       },
     },
     ios: {
@@ -69,6 +71,7 @@ const Ads = (() => {
     const w = waiters[kind];
     waiters[kind] = null;
     if (w) w(result);
+    updateBanner();
   }
 
   async function init() {
@@ -95,6 +98,9 @@ const Ads = (() => {
         if (status === 'notDetermined') await AdMob.requestTrackingAuthorization();
       } catch (e) {}
     }
+    // バナーの高さぶん、タイトル画面と結果画面の下に余白を取る（CSS の --banner-h）
+    AdMob.addListener('bannerAdSizeChanged', info => { bannerHeight = (info && info.height) || 0; applyBannerSpace(); });
+    AdMob.addListener('bannerAdFailedToLoad', () => { bannerHeight = 0; applyBannerSpace(); });
     let rewarded = false;
     AdMob.addListener('interstitialAdDismissed', () => finish('inter'));
     AdMob.addListener('interstitialAdFailedToShow', () => finish('inter'));
@@ -104,12 +110,40 @@ const Ads = (() => {
     AdMob.addListener('onRewardedVideoAdFailedToShow', () => finish('reward', false));
     prepare('inter');
     prepare('reward');
+    updateBanner();
   }
+
+  // ---- バナー（Android のみ。タイトル画面と結果画面だけに出し、プレイ中は出さない）
+  let bannerWanted = false;    // 今の画面でバナーを出したいか
+  let bannerCreated = false;   // showBanner 済みか（以後は hide / resume で切り替える）
+  let bannerVisible = false;
+  let bannerHeight = 0;
+  function applyBannerSpace() {
+    document.documentElement.style.setProperty('--banner-h', (bannerVisible ? bannerHeight : 0) + 'px');
+  }
+  function updateBanner() {
+    if (!AdMob || !ready || !ids.banner) return;
+    const want = bannerWanted && !showing;
+    if (want === bannerVisible) return;
+    bannerVisible = want;
+    applyBannerSpace();
+    if (want && !bannerCreated) {
+      bannerCreated = true;
+      AdMob.showBanner({ adId: ids.banner, adSize: 'ADAPTIVE_BANNER', position: 'BOTTOM_CENTER', margin: 0, isTesting: testing })
+        .catch(() => { bannerCreated = false; bannerVisible = false; applyBannerSpace(); });
+    } else if (want) {
+      AdMob.resumeBanner().catch(() => {});
+    } else if (bannerCreated) {
+      AdMob.hideBanner().catch(() => {});
+    }
+  }
+  function setBanner(on) { bannerWanted = on; updateBanner(); }
 
   // 全画面広告を表示し、閉じられたら resolve する（読み込めていないときは出さずにすぐ resolve）
   function showInterstitial() {
     if (!AdMob || !ready || !slots.inter.loaded || showing) return Promise.resolve();
     showing = true; slots.inter.loaded = false;
+    updateBanner();
     Sfx.suspend();
     return new Promise(resolve => {
       waiters.inter = () => { prepare('inter'); resolve(); };
@@ -123,6 +157,7 @@ const Ads = (() => {
     await initDone;
     if (!ready || !(await ensureLoaded('reward', 8000))) return 'unavailable';
     showing = true; slots.reward.loaded = false;
+    updateBanner();
     Sfx.suspend();
     return new Promise(resolve => {
       waiters.reward = ok => { prepare('reward'); resolve(ok ? 'rewarded' : 'skipped'); };
@@ -146,5 +181,6 @@ const Ads = (() => {
     showInterstitial,
     showRewarded,
     showPrivacyOptions,
+    setBanner,
   };
 })();

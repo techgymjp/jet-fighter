@@ -210,12 +210,14 @@
   Ads.initDone.then(() => { if (Ads.privacyOptionsRequired) $('adPrivacy').classList.remove('hidden'); });
   $('adPrivacyLink').addEventListener('click', e => { e.preventDefault(); Ads.showPrivacyOptions(); });
 
+  Ads.setBanner(true); // タイトル画面ではバナーを出す（Android アプリのみ。プレイ中は出さない）
   $('startBtn').addEventListener('click', () => { Sfx.init(); startGame(); });
   // 2 回に 1 回、「もう一度」の前に全画面広告を出す（Android アプリのみ）
   let retryBusy = false;
   $('retryBtn').addEventListener('click', async () => {
     if (retryBusy) return;
     Sfx.init();
+    Ads.setBanner(false);
     G.gameOvers = (G.gameOvers || 0) + 1;
     if (Ads.available && G.gameOvers % 2 === 0) {
       retryBusy = true;
@@ -306,6 +308,7 @@
     G.stats = { sunk: 0, landings: 0, maxSpeed: 0, flightTime: 0, fuelOuts: 0 };
     G.score = 0; G.kills = 0; G.stage = 1; G.lives = 3; G.stageClearT = 0; G.paused = false; G.continued = false;
     $('title').classList.add('hidden'); $('gameover').classList.add('hidden'); $('pause').classList.add('hidden');
+    Ads.setBanner(false);
     $('hud').classList.remove('hidden');
     $('touch').classList.toggle('hidden', !isTouch);
     spawnStage();
@@ -392,6 +395,7 @@
     G.snap = true; // 次に描画したフレームを記念写真としてシェア用に保存
     $('gameover').classList.remove('hidden');
     $('hud').classList.add('hidden'); $('touch').classList.add('hidden');
+    Ads.setBanner(true);
     Sfx.engine(false, 0, 0, 0);
   }
 

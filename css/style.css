@@ -163,6 +163,8 @@ body.touch .kb, body.touch .controls { display: none; }
 @media (max-height: 500px) { .storeLinks { margin-top: 6px; } .storeLinks a { font-size: 12px; padding: 4px 12px; } }
 /* 横向きスマホでは結果カードを詰めて、ボタンまで画面内に収める */
 .screen { justify-content: safe center; }
+/* バナー広告（Android アプリのタイトル画面・結果画面だけ）の高さぶん、下に余白を取って重ならないようにする */
+#title, #gameover { padding-bottom: calc(16px + var(--banner-h, 0px)); }
 @media (max-height: 500px) {
   .res-head { font-size: 14px; letter-spacing: 6px; }
   .res-score { font-size: 38px; }
