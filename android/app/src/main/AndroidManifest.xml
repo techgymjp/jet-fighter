@@ -38,4 +38,9 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- 画面は横向きに固定しているが、縦・横どちらの画面も必須ではない
+         （横向きに対応しない端末でも Google Play で配信対象から外れないようにする） -->
+    <uses-feature android:name="android.hardware.screen.landscape" android:required="false" />
+    <uses-feature android:name="android.hardware.screen.portrait" android:required="false" />
 </manifest>
