@@ -210,7 +210,7 @@
   Ads.initDone.then(() => { if (Ads.privacyOptionsRequired) $('adPrivacy').classList.remove('hidden'); });
   $('adPrivacyLink').addEventListener('click', e => { e.preventDefault(); Ads.showPrivacyOptions(); });
 
-  Ads.setBanner(true); // タイトル画面ではバナーを出す（Android アプリのみ。プレイ中は出さない）
+  Ads.setBanner(true); // タイトル画面ではバナーを出す（アプリのみ。プレイ中は出さない）
   $('startBtn').addEventListener('click', () => { Sfx.init(); startGame(); });
   // 2 回に 1 回、「もう一度」の前に全画面広告を出す（Android アプリのみ）
   let retryBusy = false;

@@ -19,10 +19,12 @@ const Ads = (() => {
       test: {
         interstitial: 'ca-app-pub-3940256099942544/4411468910',
         rewarded: 'ca-app-pub-3940256099942544/1712485313',
+        banner: 'ca-app-pub-3940256099942544/2435281174',
       },
       production: {
-        interstitial: 'ca-app-pub-6411535997477460/8511741291',
+        interstitial: 'ca-app-pub-6411535997477460/6769166203',
         rewarded: 'ca-app-pub-6411535997477460/1946332940',
+        banner: 'ca-app-pub-6411535997477460/9395329546',
       },
     },
   };
@@ -113,7 +115,7 @@ const Ads = (() => {
     updateBanner();
   }
 
-  // ---- バナー（Android のみ。タイトル画面と結果画面だけに出し、プレイ中は出さない）
+  // ---- バナー（アプリのみ。タイトル画面と結果画面だけに出し、プレイ中は出さない）
   let bannerWanted = false;    // 今の画面でバナーを出したいか
   let bannerCreated = false;   // showBanner 済みか（以後は hide / resume で切り替える）
   let bannerVisible = false;

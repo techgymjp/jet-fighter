@@ -104,7 +104,7 @@ Google の「Apple の App Store のデータ開示要件への準備」（AdMob
 
 2. How to use: No login or account is needed. Tap "LAUNCH" (出撃する) on the title screen. Fly with the virtual stick on the left; the buttons on the right are gun, MSL (missile), AB (afterburner), brake, launch/land and camera. The game is in Japanese and English (it follows the device language and can be switched on the title screen).
 
-3. External services: Google AdMob (interstitial and rewarded ads) with Google's consent form (UMP) and App Tracking Transparency. Rewarded ads are optional: when the player loses the last life, the "CONTINUE?" screen lets them watch one to get one extra life (once per game). The share button uses the iOS share sheet. No other services or in-app purchases.
+3. External services: Google AdMob (banner, interstitial and rewarded ads) with Google's consent form (UMP) and App Tracking Transparency. Rewarded ads are optional: when the player loses the last life, the "CONTINUE?" screen lets them watch one to get one extra life (once per game). The share button uses the iOS share sheet. No other services or in-app purchases.
 
 4. Regional differences: None, except that the ad consent form appears only where required (e.g. EEA/UK).
 
@@ -117,6 +117,7 @@ Google の「Apple の App Store のデータ開示要件への準備」（AdMob
 8. Features that appear only in some situations (Guideline 5.6): The app has no hidden, dormant or remotely enabled features. It behaves the same during review as for all users, and it does not download or run code from the internet. These parts appear only under certain conditions:
 - "CONTINUE?" screen: appears when the player loses the last life, once per game, only if a rewarded ad could be loaded. Watching the ad gives one extra life; "Give up" goes to the results.
 - Interstitial ad: shown after every second tap on "Retry" on the results screen.
+- Banner ad: shown at the bottom of the title screen and the results screen only (never during play, on the "CONTINUE?" screen or while a full-screen ad is showing).
 - "Ad settings" link on the title screen: appears only where Google's consent form is required (e.g. EEA/UK) and reopens that form.
 - Language buttons (日本語 / English) on the title screen switch the language at any time.
 - Switching to another app (or an incoming call) pauses the game.
