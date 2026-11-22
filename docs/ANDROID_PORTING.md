@@ -332,6 +332,7 @@ JET STRIKE の iOS 版で行ったことです。Android 版ができていれ�
 The app contains no debug menu, no test switches and no links to other app stores.
 ```
 
+**メモ欄は 4,000 文字まで**。1〜8 を全部入れると超えやすいので、各項目は短く書き、4.3 の 6 を厚くする（例：JET STRIKE の `docs/IOS_BUILD.md` 5 章は約 3,100 文字）。
 6 と 7 は、デザインスパム（Guideline 4.3 Spam）と最低限の機能（Guideline 4.2 Minimum Functionality）への先回りの説明。
 8 は「審査で見えない機能」（Guideline 5.6 Developer Code of Conduct）への先回りの説明。条件によって出る画面やボタン（CONTINUE、EU だけの広告の設定、言語の切り替えなど）を**全部**書き、デバッグ用の仕組みや他ストアへのリンクがアプリに入っていないことを書く（7-3 の `build:app` で取り除いてから書く）。
 同じ開発者アカウントから Capacitor の同じ構成のアプリを続けて出すと「同じ作りのアプリの量産」、Web の技術（WebView）で作ったアプリは「Web サイトを包んだだけ」と見られることがあるので、最初の提出から入れておく。

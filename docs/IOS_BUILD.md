@@ -100,27 +100,32 @@ Google の「Apple の App Store のデータ開示要件への準備」（AdMob
 **審査へのメモ（App Review に関する情報の「メモ」に貼る。`docs/ANDROID_PORTING.md` 7-6 のひな形どおり。初回に「Guideline 2.1 - Information Needed」が来たら、同じ文を返信する）**
 
 ```
-1. Purpose and audience: JET STRIKE is a free 3D jet fighter action game for ages 13+. Players launch from an aircraft carrier by catapult, shoot down enemy fighters with guns and lock-on missiles, sink the enemy carrier, and return to land on their own carrier to refuel and rearm.
+1. Purpose and audience: JET STRIKE is a free 3D jet fighter action game for ages 13+. Launch from an aircraft carrier, shoot down enemy fighters, sink the enemy carrier, and land back on your carrier to refuel and rearm.
 
-2. How to use: No login or account is needed. Tap "LAUNCH" (出撃する) on the title screen. Fly with the virtual stick on the left; the buttons on the right are gun, MSL (missile), AB (afterburner), brake, launch/land and camera. The game is in Japanese and English (it follows the device language and can be switched on the title screen).
+2. How to use: No login or account. Tap "LAUNCH" (出撃する) on the title screen. Fly with the left stick; the right buttons are gun, missile, afterburner, brake, launch/land and camera. Japanese and English (follows the device language; switchable on the title screen).
 
-3. External services: Google AdMob (banner, interstitial and rewarded ads) with Google's consent form (UMP) and App Tracking Transparency. Rewarded ads are optional: when the player loses the last life, the "CONTINUE?" screen lets them watch one to get one extra life (once per game). The share button uses the iOS share sheet. No other services or in-app purchases.
+3. External services: Google AdMob (banner, interstitial and rewarded ads) with Google's consent form (UMP) and App Tracking Transparency, and the iOS share sheet. No other services or in-app purchases.
 
 4. Regional differences: None, except that the ad consent form appears only where required (e.g. EEA/UK).
 
-5. Regulated content / third-party material: The game is not in a regulated industry. All graphics and sounds are original: the aircraft, carriers and effects are 3D models built in code, and the music and sound effects are synthesized in real time. The only third-party component is the open-source three.js library (MIT License). The combat is between fictional aircraft and ships; there are no people or blood.
+5. Regulated content / third-party material: Not a regulated industry. All graphics and sound effects are original (3D models built in code, sounds synthesized in real time). The only third-party component is three.js (MIT License). Combat is between fictional aircraft and ships; no people or blood.
 
-6. Originality (Guideline 4.3): JET STRIKE is an original app that we designed and built ourselves. It does not copy or imitate any other app, and it is not made from a template, a purchased source code or a re-skin of another game. All 3D models, effects, music and sound effects were created specifically for this app. It is also not a template-based variation of our other apps. Each of our games has its own game system that we designed and programmed individually for that title, and we do not reuse a game template from one app to make another, even when two of our games are in the same genre. This game's system (the jet flight model with afterburner and fuel; catapult launches and arrested landings on the carrier with refueling, repair and rearming; missile lock-on; enemy carriers with anti-aircraft fire; and the stage and lives system) was built only for this title, and its gameplay, content and visuals are its own. Only standard technical parts, such as the Capacitor app shell and the AdMob ad integration, are shared across our apps. We publish this game as a single app with one Bundle ID; there are no other versions of it on the App Store (for example, no separate free and paid editions or regional copies).
+6. Originality (Guideline 4.3): JET STRIKE is not spam, a re-skin or a repackaged template.
+- We designed and programmed it ourselves for this app. It does not copy any other app and was not made from a template, an app generator or purchased code. Its 3D models, effects and sounds are not used in our other apps.
+- Our other apps are different games, each with its own genre, rules, controls and content, built separately. None can be turned into another by swapping images or text.
+- Only JET STRIKE has: a 3D flight model with afterburner and fuel; catapult launches and arrested landings with refueling and rearming; dogfights with lock-on missiles; enemy carriers with anti-aircraft fire; Mach 1 speed effects.
+- Shared parts are only standard infrastructure used by many unrelated apps (Capacitor app shell, Google Mobile Ads SDK, build scripts). Binaries may look similar technically, but the games are different.
+- One app, one Bundle ID: no other versions (free/paid, regional or re-skinned) and no other accounts.
+- If one of our apps seems too similar, please tell us which one. We can provide gameplay videos or source code.
 
-7. App functionality (Guideline 4.2): The app is not a website wrapper. All game content (code, 3D models, effects, music, sounds and texts) is bundled in the app and fully playable offline (only ads and sharing need a connection). It also uses native iOS features such as the share sheet and App Tracking Transparency.
+7. App functionality (Guideline 4.2): Not a website wrapper. All content is bundled and playable offline (only ads and sharing need a connection). Uses native iOS features (share sheet, App Tracking Transparency).
 
-8. Features that appear only in some situations (Guideline 5.6): The app has no hidden, dormant or remotely enabled features. It behaves the same during review as for all users, and it does not download or run code from the internet. These parts appear only under certain conditions:
-- "CONTINUE?" screen: appears when the player loses the last life, once per game, only if a rewarded ad could be loaded. Watching the ad gives one extra life; "Give up" goes to the results.
-- Interstitial ad: shown after every second tap on "Retry" on the results screen.
-- Banner ad: shown at the bottom of the title screen and the results screen only (never during play, on the "CONTINUE?" screen or while a full-screen ad is showing).
-- "Ad settings" link on the title screen: appears only where Google's consent form is required (e.g. EEA/UK) and reopens that form.
-- Language buttons (日本語 / English) on the title screen switch the language at any time.
-- Switching to another app (or an incoming call) pauses the game.
+8. Conditional features (Guideline 5.6): No hidden, dormant or remotely enabled features; the app behaves the same during review and downloads no code. Parts that appear only in some situations:
+- "CONTINUE?" screen: after losing the last life, once per game, if a rewarded ad loaded (watch for +1 life, or "Give up").
+- Interstitial ad: after every second "Retry".
+- Banner ad: bottom of the title and results screens only, never during play.
+- "Ad settings" link: only where Google's consent form is required (e.g. EEA/UK).
+- Language buttons switch Japanese/English; switching apps pauses the game.
 The app contains no debug menu, no test switches and no links to other app stores.
 ```
 
